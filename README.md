@@ -25,8 +25,9 @@ Usually, when one deals with <a href="https://www.investopedia.com/terms/l/limit
 ## Content
 
 This repository contains the codebase for the project, its structure is the following:
-* **datasets** folder contains the code that was used to download and transform raw data into LOB, as well as all the required preprocessing of the data
-* **models** folder contains codebase for the models used in this project
-* **implementations** folder contains existing implementations of the used models that we used as a reference/inspiration for our own versions
-* **experiment.ipynb** (to be created) is a Jypiter Notebook file, containing the reproduction of experiments conducted during this project
+* **datasets** folder contains the code that was used to download and transform raw data into LOB, as well as all the required preprocessing of the data;
+* **models** folder contains codebase for the models used in this project;
+* **implementations** folder contains existing implementations of the used models that we used as a reference/inspiration for our own versions;
+* **images** folder contains images used in readmes;
+* **experiment.ipynb** (to be created) is a Jypiter Notebook file, containing the reproduction of experiments conducted during this project;
 * to be continued...
