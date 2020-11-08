@@ -10,7 +10,7 @@
 
 ## DeepLOB
 
-Folder **deeplob** contains <a href="https://github.com/zcakhaa/DeepLOB-Deep-Convolutional-Neural-Networks-for-Limit-Order-Books" target="_blank">original Keras implementation</a> of Zhang et al. work. Since the project does not focus on DeepLOB and treats it as a comparative baseline, this implementation is listed purely for consistency.
+Folder **deeplob** contains <a href="https://github.com/zcakhaa/DeepLOB-Deep-Convolutional-Neural-Networks-for-Limit-Order-Books" target="_blank">original Keras implementation</a> of Zhang et al. work. Since the project does not focus on DeepLOB (it is already implemented in the DeepFolio paper and we do not need to reimplement the model for this project), this implementation is listed purely for consistency.
 
 ## UNIPoint
 
