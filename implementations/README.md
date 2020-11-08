@@ -16,7 +16,7 @@ Folder **deeplob** contains original Keras implementation of Zhang et al. work. 
 
 ## Hawkes Transformer
 
-Folder **hawkes-transformer** contains the original implementation of Zuo et al. work. The network architecture is presented on the image below (taken from the original paper):
+Folder **hawkes-transformer** contains the <a href="https://github.com/SimiaoZuo/Transformer-Hawkes-Process" target="_blank">original implementation</a> of Zuo et al. work. The network architecture is presented on the image below (taken from the original paper):
 
 <p align="center">
   <img width="350" height="300" src="https://github.com/rodrigorivera/mds20_deepfolio/blob/main/images/THP-arch.png">
