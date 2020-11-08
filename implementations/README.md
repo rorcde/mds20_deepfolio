@@ -16,7 +16,7 @@ Folder **deeplob** contains <a href="https://github.com/zcakhaa/DeepLOB-Deep-Con
 
 ## Hawkes Transformer
 
-Folder **hawkes-transformer** contains the <a href="https://github.com/SimiaoZuo/Transformer-Hawkes-Process" target="_blank">original implementation</a> of Zuo et al. work. The network architecture is presented on the image below (taken from the original paper):
+Folder **hawkes-transformer** contains the <a href="https://github.com/SimiaoZuo/Transformer-Hawkes-Process" target="_blank">original implementation</a> of Zuo et al. work. The network architecture is presented on the image below (taken from <a href="https://paperpile.com/shared/KNRY5s" target="_blank">Transformer Hawkes Process</a>):
 
 <p align="center">
   <img width="350" height="300" src="https://github.com/rodrigorivera/mds20_deepfolio/blob/main/images/THP-arch.png">
