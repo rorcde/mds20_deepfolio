@@ -30,7 +30,7 @@ From the right side a more detailed view is given. It is showing how UNIPoint ad
 
 **Implementation details**
 
-Since the implementation from authors **is not available**, we are going to implement the model according to the paper description.
+Since the implementation from authors **is not available**, we are going to implement the model according to the paper description. For this we are going to use PyTorch layers from *torch.nn*.
 
 * **Vanilla RNN** is going to be used to produce hidden states <img src="https://latex.codecogs.com/png.latex?h_i&space;\in&space;R^M" /></a> (although the paper states that LSTM or GRU can also be used). Vanilla RNN is defined as:
 <img src="https://latex.codecogs.com/png.latex?h_i&space;=&space;f(Wh_{i-1}&space;&plus;&space;v\tau_i&space;&plus;&space;b)" /></a>
