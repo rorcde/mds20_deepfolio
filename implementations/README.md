@@ -14,7 +14,7 @@ Folder **deeplob** contains <a href="https://github.com/zcakhaa/DeepLOB-Deep-Con
 
 ## UNIPoint
 
-Folder **UNIPoint** contains our implementation of UNIPoint neural network (no ready implementation available) which is described in the paper of Soen et al. 
+There is no ready implementation available for the UNIPoint RNN which is described in the paper of Soen et al. 
 
 The main idea behind this neural network is that for a given dataset of event sequences <img src="https://latex.codecogs.com/png.latex?\{t_i\}_{i=1}^N" /></a> and corresponding intterarrival times <img src="https://latex.codecogs.com/png.latex?\tau_i&space;=&space;t_i&space;-&space;t_{i-1}" /></a> UNIPoint produces an intensity function <img src="https://latex.codecogs.com/png.latex?\hat{\lambda}" /></a>. In order to do this, UNIPoint combines a RNN with a transfer function and a sum of basis functions. 
 
