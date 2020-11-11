@@ -48,6 +48,13 @@ The interarrival times can be also normalised by their standard deviation in ord
 * For **loss function** the point process negative log-likelihood is going to be used.
 <img src="https://latex.codecogs.com/png.latex?L&space;=&space;[\prod_{i=1}^N&space;\lambda^*(t_i)]&space;exp(\int_{0}^{T}&space;\lambda^*(s)ds))"  /></a>
 
+* For the **basis functions** we are planning to test all functions suggested by the authors in the table below, they are: power law function, exponential function, cosinus, sigmoid, ReLU and some combinations of them (PL + ReLU). We also will test different numbers of basis function in the model {2, 4, 8, 16, 32}.
+
+<p align="center">
+  <img width="400" height="200" src="https://github.com/rodrigorivera/mds20_deepfolio/blob/main/images/basis_func.PNG">
+</p>
+
+* For **loss calculation** authors suggest to use Monte-Carlo integration with 200 per event interval, but it can be done differently - through linear interpolation or trapezoidal rule.
 ## Hawkes Transformer
 
 Folder **hawkes-transformer** contains the <a href="https://github.com/SimiaoZuo/Transformer-Hawkes-Process" target="_blank">original implementation</a> of Zuo et al. work. The network architecture is presented on the image below (taken from <a href="https://paperpile.com/shared/KNRY5s" target="_blank">Transformer Hawkes Process</a>):
