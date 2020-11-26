@@ -30,7 +30,7 @@ def run_epoch(model, optimizer, criterion, dataloader, mode = 'train'):
     with torch.set_grad_enabled(is_train):
         for sample in dataloader:
 
-            event_seqs, time_seqs, total_time_seqs, seqs_length = BeginningOfStream(sample, model.emb_size)
+            event_seqs, time_seqs, total_time_seqs, seqs_length = BeginningOfStream(sample, model.type_size)
             output = model.forward(event_seqs.to(device), time_seqs.to(device))
             loss = criterion(model, event_seqs.to(device), time_seqs, seqs_length,
                                               total_time_seqs.to(device), output)
