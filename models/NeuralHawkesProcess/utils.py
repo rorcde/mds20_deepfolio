@@ -76,20 +76,20 @@ def evaluate_prediction(model, dataloader, device):
             accuracy_score - for event type prediction
         """
 
-    pred_data = []
-    for sample in dataloader:
-        event_seqs, time_seqs, total_time_seqs, seqs_length = pad_bos(sample, model.type_size)
-        for i in range(len(event_seqs)):
-            pred_data.append(predict_event(model, time_seqs[i], event_seqs[i], seqs_length[i], device))
-    
-    pred_data = np.array(pred_data)
-    time_gt, time_pred = pred_data[:,0], pred_data[:,1]
-    type_gt, type_pred = pred_data[:,2], pred_data[:,3]
+        pred_data = []
+        for sample in dataloader:
+            event_seqs, time_seqs, total_time_seqs, seqs_length = pad_bos(sample, model.type_size)
+            for i in range(len(event_seqs)):
+                pred_data.append(predict_event(model, time_seqs[i], event_seqs[i], seqs_length[i], device))
 
-    time_mse_error = mean_squared_error(time_gt, time_pred)
-    type_accuracy = accuracy_score(type_gt, type_pred)
-    
-    return time_mse_error, type_accuracy
+        pred_data = np.array(pred_data)
+        time_gt, time_pred = pred_data[:,0], pred_data[:,1]
+        type_gt, type_pred = pred_data[:,2], pred_data[:,3]
+
+        time_mse_error = mean_squared_error(time_gt, time_pred)
+        type_accuracy = accuracy_score(type_gt, type_pred)
+
+        return time_mse_error, type_accuracy
 
 
 
