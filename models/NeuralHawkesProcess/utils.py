@@ -67,7 +67,7 @@ from sklearn.metrics import accuracy_score, mean_squared_error
 def evaluate_prediction(model, dataloader, device):
     pred_data = []
     for sample in dataloader:
-        event_seqs, time_seqs, total_time_seqs, seqs_length = pad_bos(sample, model.type_size)
+        event_seqs, time_seqs, total_time_seqs, seqs_length = pad_bos(sample, model.emb_size)
         for i in range(len(event_seqs)):
             pred_data.append(predict_event(model, time_seqs[i], event_seqs[i], seqs_length[i], device))
     
