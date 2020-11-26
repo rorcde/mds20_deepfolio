@@ -65,17 +65,16 @@ class LogLikelihoodLoss(nn.Module):
 from sklearn.metrics import accuracy_score, mean_squared_error
 
 def evaluate_prediction(model, dataloader, device):
-     """ 
-     Evalute prediction on give dataset
-     Will compute mse and accuracy score for event time and type prediction.
-     Input:
-        model - NHP model to compute decay states for sequence
-        dataloader - dataloader with data
-        Output:
-            mean_squared_error - for event time prediction
-            accuracy_score - for event type prediction
         """
-
+        Evalute prediction on give dataset
+        Will compute mse and accuracy score for event time and type prediction.
+        Input:
+           model - NHP model to compute decay states for sequence
+           dataloader - dataloader with data
+        Output:
+           mean_squared_error - for event time prediction
+           accuracy_score - for event type prediction
+        """
         pred_data = []
         for sample in dataloader:
             event_seqs, time_seqs, total_time_seqs, seqs_length = pad_bos(sample, model.type_size)
