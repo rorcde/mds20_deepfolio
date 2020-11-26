@@ -44,18 +44,18 @@ class NHPLSTMCell(nn.Module):
 
 class NHPModel(nn.Module):
     """ Continuous time LSTM network with decay function """
-    def __init__(self, hidden_size,  device, emb_size=7, batch_first=True):
+    def __init__(self, hidden_size,  device, type_size=7, batch_first=True):
         super(NHPModel, self).__init__()
         
         self.hidden_size = hidden_size
-        self.emb_size = emb_size
+        self.type_size = type_size
         self.batch_first = batch_first
         self.device = device
 
         self.LSTM_cell = NHPLSTMCell(self.hidden_size)
-        self.Embedding = nn.Embedding(self.emb_size+1, self.hidden_size)
+        self.Embedding = nn.Embedding(self.type_size+1, self.hidden_size)
         self.intensity_layer = nn.Sequential(
-                              nn.Linear(self.hidden_size, self.emb_size),
+                              nn.Linear(self.hidden_size, self.type_size),
                               nn.Softplus())
 
     def init_states(self, batch_size):
