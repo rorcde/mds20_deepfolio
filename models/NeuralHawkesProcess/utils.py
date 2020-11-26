@@ -16,7 +16,7 @@ class LogLikelihoodLoss(nn.Module):
         sim_time_seqs = torch.stack(sim_time_seqs)
         sim_time_seqs = sim_time_seqs.transpose(1,0)
         if self.device:
-            sim_time_seqs = sim_time_seqs.to(device)
+            sim_time_seqs = sim_time_seqs.to(self.device)
 
         return sim_time_seqs
 
