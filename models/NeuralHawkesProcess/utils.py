@@ -127,7 +127,7 @@ def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
             P = intensity / intensity_sum[:, None] * density[:, None]  
             pred_type = torch.argmax(timestep * 0.5 * (P[1:] + P[:-1])).sum(dim=0)
 
-            return pred_dt.cpu().numpy(), gt_dt.cpu().numpy(), pred_type.cpu().numpy(), gt_type.cpu().numpy(), 
+            return pred_dt.cpu().numpy(), gt_dt.cpu().numpy(), pred_type.cpu().numpy(), gt_type.cpu().numpy(), \
                             time_between_events.cpu().numpy(), intensity_sum.cpu().numpy()
         
         
