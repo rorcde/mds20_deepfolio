@@ -113,21 +113,22 @@ def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
             time_between_events = torch.linspace(0, hmax, n_samples + 1).to(device)
             hidden_vals = h_t * torch.exp(-decay * time_between_events[:, None])
             intensity = model.intensity_layer(hidden_vals.to(device))
-            
+            intensity_sum = intensity.sum(dim=1)
+
 
             # 2) Compute density via integral 
             density = torch.cumsum(timestep * intensity.sum(dim=1), dim=0)
-            density = intensity.sum(dim=1) * torch.exp(-density)
+            density = intensity_sum * torch.exp(-density)
 
             # 3) Predict time of the next event via trapeze method
             t = time_between_events * density   
             pred_dt = (timestep * 0.5 * (t[1:] + t[:-1])).sum() 
-            
             # 4) Predict type of the event via trapeze method
-            P = intensity / intensity.sum(dim=1)[:, None] * density[:, None]  
+            P = intensity / intensity_sum[:, None] * density[:, None]  
             pred_type = torch.argmax(timestep * 0.5 * (P[1:] + P[:-1])).sum(dim=0)
 
-            return pred_dt.cpu().numpy(), gt_dt.cpu().numpy(), pred_type.cpu().numpy(), gt_type.cpu().numpy()
+            return pred_dt.cpu().numpy(), gt_dt.cpu().numpy(), pred_type.cpu().numpy(), gt_type.cpu().numpy(), 
+                            time_between_events.cpu().numpy(), intensity_sum.cpu().numpy()
         
         
 def BeginningOfStream(batch_data, type_size):
