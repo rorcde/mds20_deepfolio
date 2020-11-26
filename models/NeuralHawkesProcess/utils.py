@@ -65,6 +65,17 @@ class LogLikelihoodLoss(nn.Module):
 from sklearn.metrics import accuracy_score, mean_squared_error
 
 def evaluate_prediction(model, dataloader, device):
+     """ 
+     Evalute prediction on give dataset
+     Will compute mse and accuracy score for event time and type prediction.
+     Input:
+        model - NHP model to compute decay states for sequence
+        dataloader - dataloader with data
+        Output:
+            mean_squared_error - for event time prediction
+            accuracy_score - for event type prediction
+        """
+
     pred_data = []
     for sample in dataloader:
         event_seqs, time_seqs, total_time_seqs, seqs_length = pad_bos(sample, model.type_size)
@@ -84,7 +95,23 @@ def evaluate_prediction(model, dataloader, device):
 
 def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
                      n_samples=1000):
-  
+        """ 
+        Predict last event time and type for the given sequence 
+        Last event takes as unknown and model feeds with all remain sequence.
+        Input:
+            model - NHP model to compute decay states for sequence
+            seq_time - torch.tensor with time diffs between events in sequence
+            seq_events - torch.tensor with event types for each time point
+            seq_lengths - lengths of the sequence
+        
+        Output:
+            pred_dt - predicted dt for next event
+            gt_dt - gt df of next event
+            pred_type - predicted type of next event
+            gt_type - gt_type of next event
+            time_between_events - np.array - generated timestamps
+            intensity - np.array - intensity after event
+        """
 
         """ Feed the model with sequence and compute decay cell state """
 
@@ -128,7 +155,7 @@ def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
             pred_type = torch.argmax(timestep * 0.5 * (P[1:] + P[:-1])).sum(dim=0)
 
             return pred_dt.cpu().numpy(), gt_dt.cpu().numpy(), pred_type.cpu().numpy(), gt_type.cpu().numpy(), \
-                            time_between_events.cpu().numpy(), intensity_sum.cpu().numpy()
+                            time_between_events.cpu().numpy(), intensity.cpu().numpy()
         
         
 def BeginningOfStream(batch_data, type_size):
