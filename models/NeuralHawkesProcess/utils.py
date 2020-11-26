@@ -96,7 +96,7 @@ def evaluate_prediction(model, dataloader, device):
         for sample in dataloader:
             event_seqs, time_seqs, total_time_seqs, seqs_length = BeginningOfStream(sample, model.type_size)
             for i in range(len(event_seqs)):
-                pred_data.append(predict_event(model, time_seqs[i], event_seqs[i], seqs_length[i], device))
+                pred_data.append(predict_event(model, time_seqs[i], event_seqs[i], seqs_length[i], device)[:4])
 
         pred_data = np.array(pred_data)
         time_gt, time_pred = pred_data[:,0], pred_data[:,1]
@@ -106,8 +106,7 @@ def evaluate_prediction(model, dataloader, device):
         type_accuracy = accuracy_score(type_gt, type_pred)
 
         return time_mse_error, type_accuracy
-
-
+    
 
 def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
                      n_samples=1000):
