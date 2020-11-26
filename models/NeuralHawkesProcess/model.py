@@ -44,7 +44,7 @@ class NHPLSTMCell(nn.Module):
 
 class NHPModel(nn.Module):
     """ Continuous time LSTM network with decay function """
-    def __init__(self, hidden_size,  device, type_size=7, batch_first=True):
+    def __init__(self, hidden_size,  device, type_size=2, batch_first=True):
         super(NHPModel, self).__init__()
         
         self.hidden_size = hidden_size
