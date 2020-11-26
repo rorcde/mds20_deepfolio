@@ -19,7 +19,7 @@ def BeginningOfStream(batch_data, type_size):
 
             return pad_event_seqs.long(), pad_time_seqs, seq_tot_time, seqs_len
 
-def run_epoch(model, optimizer, criterion, dataloader, mode = 'train'):
+def run_epoch(model, optimizer, criterion, dataloader, device, mode = 'train'):
     if mode == 'train':
       model.train(True)
     else:
@@ -57,8 +57,8 @@ def train(model, optimizer, criterion, train_loader, val_loader, device, n_epoch
     type_accuracy_history = {'train': [], 'val': []}
     for epoch in range(n_epochs):
 
-        train_loss = run_epoch(model, optimizer, criterion, train_loader, mode = 'train')
-        val_loss = run_epoch(model, None, criterion, val_loader, mode = 'val')
+        train_loss = run_epoch(model, optimizer, criterion, train_loader, device, mode = 'train')
+        val_loss = run_epoch(model, None, criterion, val_loader, device, mode = 'val')
 
         if eval_pred:
           #time_mse_error_train, type_accuracy_train = evaluate_prediction(model, train_loader)
