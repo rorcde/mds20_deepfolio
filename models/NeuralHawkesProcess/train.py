@@ -2,7 +2,22 @@
 
 import time 
 import torch
-from mds20_deepfolio.models.NeuralHawkesProcess.utils import BeginningOfStream
+
+def BeginningOfStream(batch_data, type_size):
+            """
+              While initializing LSTM we have it read a special beginning-of-stream (BOS) event (k0, t0), 
+              where k0 is a special event type and t0 is set to be 0 
+              (expanding the LSTM’s input dimensionality by one) see Appendix A.2
+            """
+
+            seq_events, seq_time, seq_tot_time, seqs_len = batch_data
+
+            pad_event = torch.zeros_like(seq_events[:,0]) + type_size
+            pad_time = torch.zeros_like(seq_time[:,0])
+            pad_event_seqs = torch.cat((pad_event.reshape(-1,1), seq_events), dim=1)
+            pad_time_seqs = torch.cat((pad_time.reshape(-1,1), seq_time), dim=1)
+
+            return pad_event_seqs.long(), pad_time_seqs, seq_tot_time, seqs_len
 
 def run_epoch(model, optimizer, criterion, dataloader, mode = 'train'):
     if mode == 'train':
