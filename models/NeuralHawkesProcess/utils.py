@@ -61,6 +61,23 @@ class LogLikelihoodLoss(nn.Module):
         loglikelihood = original_loglikelihood - simulated_likelihood
         return -loglikelihood
 
+    
+def BeginningOfStream(batch_data, type_size):
+    """
+      While initializing LSTM we have it read a special beginning-of-stream (BOS) event (k0, t0), 
+      where k0 is a special event type and t0 is set to be 0 
+      (expanding the LSTM’s input dimensionality by one) see Appendix A.2
+    """
+
+    seq_events, seq_time, seq_tot_time, seqs_len = batch_data
+
+    pad_event = torch.zeros_like(seq_events[:,0]) + type_size
+    pad_time = torch.zeros_like(seq_time[:,0])
+    pad_event_seqs = torch.cat((pad_event.reshape(-1,1), seq_events), dim=1)
+    pad_time_seqs = torch.cat((pad_time.reshape(-1,1), seq_time), dim=1)
+
+    return pad_event_seqs.long(), pad_time_seqs, seq_tot_time, seqs_len
+
 
 from sklearn.metrics import accuracy_score, mean_squared_error
 
@@ -77,7 +94,7 @@ def evaluate_prediction(model, dataloader, device):
         """
         pred_data = []
         for sample in dataloader:
-            event_seqs, time_seqs, total_time_seqs, seqs_length = pad_bos(sample, model.type_size)
+            event_seqs, time_seqs, total_time_seqs, seqs_length = BeginningOfStream(sample, model.type_size)
             for i in range(len(event_seqs)):
                 pred_data.append(predict_event(model, time_seqs[i], event_seqs[i], seqs_length[i], device))
 
@@ -157,19 +174,3 @@ def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
                             time_between_events.cpu().numpy(), intensity.cpu().numpy()
         
         
-def BeginningOfStream(batch_data, type_size):
-    """
-      While initializing LSTM we have it read a special beginning-of-stream (BOS) event (k0, t0), 
-      where k0 is a special event type and t0 is set to be 0 
-      (expanding the LSTM’s input dimensionality by one) see Appendix A.2
-    """
-
-    seq_events, seq_time, seq_tot_time, seqs_len = batch_data
-
-    pad_event = torch.zeros_like(seq_events[:,0]) + type_size
-    pad_time = torch.zeros_like(seq_time[:,0])
-    pad_event_seqs = torch.cat((pad_event.reshape(-1,1), seq_events), dim=1)
-    pad_time_seqs = torch.cat((pad_time.reshape(-1,1), seq_time), dim=1)
-
-    return pad_event_seqs.long(), pad_time_seqs, seq_tot_time, seqs_len
-
