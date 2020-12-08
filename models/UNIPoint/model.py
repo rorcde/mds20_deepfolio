@@ -27,7 +27,7 @@ import numpy as np
 
 
 class UNIPoint(nn.Module):
-    def __init__(self, batch_size, seq_len, n_features, n_parameters, n_basis_functions):
+    def __init__(self, batch_size, seq_len, n_features, n_parameters, n_basis_functions, type_size=2):
       """
       Input parameters:
       n_parameters - expecteed number of parameters in basis function
