@@ -11,9 +11,9 @@ import torch
 from torch import nn
 import numpy as np
 
-class LogLikelihoodLoss(nn.Module):
+class LikelihoodLoss(nn.Module):
     def __init__(self, device=None):
-        super(LogLikelihoodLoss, self).__init__()
+        super(LikelihoodLoss, self).__init__()
         self.device = device
 
     def create_unif_d(self, batch_length, total_time_seqs):
