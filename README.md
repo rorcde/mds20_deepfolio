@@ -29,5 +29,5 @@ This repository contains the codebase for the project, its structure is the foll
 * **models** folder contains codebase for the models used in this project;
 * **implementations** folder contains existing implementations of the used models that we used as a reference / inspiration for our own versions, as well as detailed implementation descriptions and differences with our own versions;
 * **images** folder contains images used in readmes;
-* **experiment.ipynb** (to be created) is a Jypiter Notebook file, containing the reproduction of experiments conducted during this project;
+* **experiment.ipynb** (to be created) is a Jupyter Notebook file, containing the reproduction of experiments conducted during this project;
 * to be continued...
