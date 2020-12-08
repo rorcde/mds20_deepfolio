@@ -30,7 +30,6 @@ class UNIPoint(nn.Module):
     def __init__(self, batch_size, seq_len, n_features, n_parameters, n_basis_functions):
       """
       Input parameters:
-      n_neurons - number of neurons inside RNN
       n_parameters - expecteed number of parameters in basis function
       n_basis_functions - number of basis functions
       """
