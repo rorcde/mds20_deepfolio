@@ -41,6 +41,7 @@ class UNIPoint(nn.Module):
       self.basis_res = torch.randn(batch_size, n_basis_functions) #initialize matrix for basis f-s calculations results
       self.Softplus = torch.nn.Softplus(beta = 1)
       self.n_basis_functions = n_basis_functions
+      self.type_size = type_size
 
     def ReLU(self, parameter_1, parameter_2, time):
       """Function to apply Rectified Linear Unit (ReLU) as basis function inside network 
