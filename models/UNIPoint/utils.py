@@ -76,5 +76,5 @@ class LikelihoodLoss(nn.Module):
             arr = torch.arange(seq_len)
             MC_integral += mc_coefficient * sim_intensity[arr, idx, :].sum(dim=(1,0))
 
-        loglikelihood = first_term*torch.exp(MC_integral)
-        return -loglikelihood
+        likelihood = first_term*torch.exp(MC_integral)
+        return -likelihood
