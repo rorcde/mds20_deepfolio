@@ -1,0 +1,548 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "accelerator": "GPU",
+    "colab": {
+      "name": "UNIPoint_Stepanov.ipynb",
+      "provenance": []
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "uw2croG95_XE"
+      },
+      "source": [
+        "import torch\r\n",
+        "import torch.nn as nn\r\n",
+        "from torch.nn import functional as F\r\n",
+        "from torch import optim\r\n",
+        "\r\n",
+        "import numpy as np\r\n",
+        "\r\n",
+        "from torch.utils.data import Dataset, DataLoader\r\n",
+        "device = torch.device(\"cuda:0\" if torch.cuda.is_available() else \"cpu\")"
+      ],
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "R51TRvHx6jvL",
+        "outputId": "622813d8-b831-4bb9-f118-0c89f23839c0"
+      },
+      "source": [
+        "!git clone https://username:password@github.com/rodrigorivera/mds20_deepfolio\r\n",
+        "from mds20_deepfolio.models.NeuralHawkesProcess.DataWrapper import NHPDataset\r\n",
+        "\r\n",
+        "!unzip /content/mds20_deepfolio/models/NeuralHawkesProcess/data/fin_data.zip \\\r\n",
+        "      -d /content/mds20_deepfolio/models/NeuralHawkesProcess/data/"
+      ],
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "fatal: destination path 'mds20_deepfolio' already exists and is not an empty directory.\n",
+            "Archive:  /content/mds20_deepfolio/models/NeuralHawkesProcess/data/fin_data.zip\n",
+            "replace /content/mds20_deepfolio/models/NeuralHawkesProcess/data/test.pkl? [y]es, [n]o, [A]ll, [N]one, [r]ename: a\n",
+            "error:  invalid response [a]\n",
+            "replace /content/mds20_deepfolio/models/NeuralHawkesProcess/data/test.pkl? [y]es, [n]o, [A]ll, [N]one, [r]ename: a\n",
+            "error:  invalid response [a]\n",
+            "replace /content/mds20_deepfolio/models/NeuralHawkesProcess/data/test.pkl? [y]es, [n]o, [A]ll, [N]one, [r]ename: A\n",
+            "  inflating: /content/mds20_deepfolio/models/NeuralHawkesProcess/data/test.pkl  \n",
+            "  inflating: /content/mds20_deepfolio/models/NeuralHawkesProcess/data/dev.pkl  \n",
+            "  inflating: /content/mds20_deepfolio/models/NeuralHawkesProcess/data/train.pkl  \n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "qQEzfHUE4BIr"
+      },
+      "source": [
+        "import pickle\r\n",
+        "\r\n",
+        "class NHPDataset(Dataset):\r\n",
+        "    ''' \r\n",
+        "    Create Dataset for Neural Hawkey Process\r\n",
+        "    '''\r\n",
+        "\r\n",
+        "    def __init__(self, file_path):\r\n",
+        "        self.event_type = []\r\n",
+        "        self.sequence_time = []\r\n",
+        "\r\n",
+        "        with open(file_path, 'rb') as f:\r\n",
+        "\r\n",
+        "            if 'dev' in file_path:\r\n",
+        "                seqs = pickle.load(f, encoding='latin1')['dev']\r\n",
+        "            elif 'train' in file_path:\r\n",
+        "                seqs = pickle.load(f, encoding='latin1')['train']\r\n",
+        "            elif 'test' in file_path:\r\n",
+        "                seqs = pickle.load(f, encoding='latin1')['test']\r\n",
+        "\r\n",
+        "            for idx, seq in enumerate(seqs):\r\n",
+        "                self.event_type.append(torch.Tensor([int(event['type_event']) for event in seq]))\r\n",
+        "                self.sequence_time.append(torch.Tensor([float(event['time_since_start']) for event in seq]))\r\n",
+        "\r\n",
+        "            self.event_time = []\r\n",
+        "            for types, times in zip(self.event_type, self.sequence_time):\r\n",
+        "\r\n",
+        "                self.event_time.append(times[types==0])\r\n",
+        "                self.event_time.append(times[types==1])\r\n",
+        "\r\n",
+        "    def __len__(self):\r\n",
+        "        return len(self.event_time)\r\n",
+        "    \r\n",
+        "    def __getitem__(self, index):\r\n",
+        "\r\n",
+        "        event_time = torch.Tensor(self.event_time[index])\r\n",
+        "        delta_time = torch.zeros_like(event_time)\r\n",
+        "        delta_time[1:] = event_time[1:] - event_time[:-1]\r\n",
+        "\r\n",
+        "        return delta_time"
+      ],
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "YUbht85K9g5z"
+      },
+      "source": [
+        "import pickle\r\n",
+        "\r\n",
+        "class NHPDataset(Dataset):\r\n",
+        "    ''' \r\n",
+        "    Create Dataset for Neural Hawkey Process\r\n",
+        "    '''\r\n",
+        "\r\n",
+        "    def __init__(self, file_path):\r\n",
+        "        self.event_type = []\r\n",
+        "        self.event_time = []\r\n",
+        "\r\n",
+        "        with open(file_path, 'rb') as f:\r\n",
+        "\r\n",
+        "            if 'dev' in file_path:\r\n",
+        "                seqs = pickle.load(f, encoding='latin1')['dev']\r\n",
+        "            elif 'train' in file_path:\r\n",
+        "                seqs = pickle.load(f, encoding='latin1')['train']\r\n",
+        "            elif 'test' in file_path:\r\n",
+        "                seqs = pickle.load(f, encoding='latin1')['test']\r\n",
+        "\r\n",
+        "            for idx, seq in enumerate(seqs):\r\n",
+        "                self.event_type.append(torch.Tensor([int(event['type_event']) for event in seq]))\r\n",
+        "                self.event_time.append(torch.Tensor([float(event['time_since_start']) for event in seq]))\r\n",
+        "\r\n",
+        "    def __len__(self):\r\n",
+        "        return len(self.event_type)\r\n",
+        "    \r\n",
+        "    def __getitem__(self, index):\r\n",
+        "\r\n",
+        "        event_type = torch.LongTensor(self.event_type[index].long())\r\n",
+        "        event_time = torch.Tensor(self.event_time[index])\r\n",
+        "        delta_time = torch.zeros_like(event_time)\r\n",
+        "        delta_time[1:] = event_time[1:] - event_time[:-1]\r\n",
+        "        \r\n",
+        "        return delta_time, event_type"
+      ],
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "4-GXNf7K_rVg"
+      },
+      "source": [
+        "train_dataset = NHPDataset('/content/mds20_deepfolio/models/NeuralHawkesProcess/data/train.pkl')\r\n",
+        "val_dataset = NHPDataset('/content/mds20_deepfolio/models/NeuralHawkesProcess/data/dev.pkl')\r\n",
+        "test_dataset = NHPDataset('/content/mds20_deepfolio/models/NeuralHawkesProcess/data/test.pkl')\r\n",
+        "\r\n",
+        "train_loader = DataLoader(train_dataset, batch_size=12)\r\n",
+        "val_loader = DataLoader(val_dataset, batch_size=12)\r\n",
+        "test_loader = DataLoader(test_dataset, batch_size=12)"
+      ],
+      "execution_count": 5,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "NBFHyoj1zB8M",
+        "outputId": "9179531d-cb79-47e0-bebd-f2f35e753c05"
+      },
+      "source": [
+        "train_dataset[3]"
+      ],
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(tensor([0.0000, 0.1000, 2.1500,  ..., 0.3833, 1.3000, 0.0166]),\n",
+              " tensor([1, 1, 1,  ..., 1, 0, 0]))"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 6
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "hB3IwNmFUM1I"
+      },
+      "source": [
+        "def create_unifrom_d(event_times, device = None):\r\n",
+        "    \"\"\"\r\n",
+        "    Create uniform distribution of t from given event sequenses\r\n",
+        "    Inputs:\r\n",
+        "        event_times (B, T) - inter-arrival times of events\r\n",
+        "    \"\"\"\r\n",
+        "\r\n",
+        "    batch_size, batch_len = event_times.shape\r\n",
+        "    sim_inter_times = []\r\n",
+        "    tot_time_seqs = event_times.sum(dim=1)\r\n",
+        "    for tot_time in tot_time_seqs:\r\n",
+        "\r\n",
+        "          sim_time_seqs = torch.zeros(batch_len).uniform_(0,tot_time)\r\n",
+        "          sim_inter_time = torch.zeros(batch_len)\r\n",
+        "          sim_inter_time[1:] = abs(sim_time_seqs[1:] - sim_time_seqs[:-1])\r\n",
+        "          sim_inter_times.append(sim_inter_time)\r\n",
+        "\r\n",
+        "    if device != None:\r\n",
+        "        sim_inter_times = torch.stack(sim_inter_times).to(device)\r\n",
+        "    else: \r\n",
+        "        sim_inter_times = torch.stack(sim_inter_times)\r\n",
+        "\r\n",
+        "    return sim_inter_times"
+      ],
+      "execution_count": 7,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "zef5MhBt6Ilk"
+      },
+      "source": [
+        "class UNIPoint(nn.Module):\r\n",
+        "    def __init__(self, n_features, n_parameters, n_basis_functions, device, hidden_size=256):\r\n",
+        "      \"\"\"\r\n",
+        "      Input parameters:\r\n",
+        "      n_neurons - number of neurons inside RNN\r\n",
+        "      n_parameters - expecteed number of parameters in basis function\r\n",
+        "      n_basis_functions - number of basis functions\r\n",
+        "      \"\"\"\r\n",
+        "      super(UNIPoint, self).__init__()\r\n",
+        "\r\n",
+        "      self.rnn = nn.RNNCell(n_features, hidden_size)\r\n",
+        "      self.h2p = nn.Linear(hidden_size, n_parameters * n_basis_functions)\r\n",
+        "      self.Softplus = torch.nn.Softplus(beta = 1)\r\n",
+        "\r\n",
+        "      self.n_basis_functions = n_basis_functions\r\n",
+        "      self.hidden_size = hidden_size\r\n",
+        "      self.device = device\r\n",
+        "\r\n",
+        "    def ReLU(self, parameter_1, parameter_2, time):\r\n",
+        "      \"\"\"Function to apply Rectified Linear Unit (ReLU) as basis function inside network \r\n",
+        "        Input parameters:\r\n",
+        "          parameters - alpha, beta for basis function's value calculation\r\n",
+        "          time - column-vector with time which had been spent since the begining of \r\n",
+        "                  temporal point process (TPP)\r\n",
+        "      \"\"\"\r\n",
+        "      self.output = torch.relu(self.parameters[:,parameter_1] * time + self.parameters[:,parameter_2] ) \r\n",
+        "      return self.output\r\n",
+        "    \r\n",
+        "    def PowerLaw(self, parameter_1, parameter_2, time): # need to fix (see ReLU parameters and do the same)\r\n",
+        "      \"\"\"Function to apply Power Law (PL) as basis function inside network \r\n",
+        "        Input parameters:\r\n",
+        "          parameters - alpha, beta for basis function's value calculation\r\n",
+        "          time - column-vector with time which had been spent since the begining of \r\n",
+        "                  temporal point process (TPP)\r\n",
+        "      \"\"\"\r\n",
+        "      self.output = self.parameters[:,parameter_1] * (1 + time)**( - self.parameters[:,parameter_2])\r\n",
+        "      return self.output\r\n",
+        "\r\n",
+        "\r\n",
+        "    def intensity_layer(self, tau):\r\n",
+        "          '''\r\n",
+        "          Layer to calculate intesity with respect to time from the last event\r\n",
+        "\r\n",
+        "          Input: tau - time from the last event\r\n",
+        "          '''\r\n",
+        "\r\n",
+        "          for function in range(self.n_basis_functions): \r\n",
+        "              # calculating numbers of parameters to take for basis function\r\n",
+        "              par1 = 2 * function\r\n",
+        "              par2 = 2 * function + 1\r\n",
+        "              self.basis_res[:, function] = self.ReLU(par1, par2, tau) \r\n",
+        "          \r\n",
+        "          self.sum_res = torch.sum(self.basis_res, 1)\r\n",
+        "          intensity = self.Softplus(self.sum_res)\r\n",
+        "\r\n",
+        "          return intensity\r\n",
+        "\r\n",
+        "    def init_hidden(self, batch_size, hidden_size):\r\n",
+        "\r\n",
+        "      self.hx = torch.randn(batch_size, hidden_size, device=self.device) # initialize hidden state \r\n",
+        "      self.basis_res = torch.randn(batch_size, self.n_basis_functions) #initialize matrix for basis f-s calculations results\r\n",
+        "\r\n",
+        "    def forward(self, event_times, event_type):\r\n",
+        "      \"\"\"Input parameters:\r\n",
+        "          event_times - interarrival times between events\r\n",
+        "\r\n",
+        "      \"\"\"\r\n",
+        "        \r\n",
+        "      hidden_states, intensity_values = [], []\r\n",
+        "      batch_size, batch_len = event_times.shape\r\n",
+        "\r\n",
+        "      # init hidden states\r\n",
+        "      self.init_hidden(batch_size, self.hidden_size)\r\n",
+        "\r\n",
+        "      # for each time step (here X shape is (batch_size, seq_len, n_features) )\r\n",
+        "      for i in range(batch_len):\r\n",
+        "\r\n",
+        "          self.hx = self.rnn(event_times[:,i].reshape(-1,1), self.hx)\r\n",
+        "          self.parameters = self.h2p(self.hx).to(self.device)\r\n",
+        "          \r\n",
+        "          intensity = self.intensity_layer(event_times[:,i])\r\n",
+        "          hidden_states.append(self.hx)\r\n",
+        "          intensity_values.append(intensity)\r\n",
+        "                    \r\n",
+        "      return  torch.stack(intensity_values)\r\n",
+        "\r\n",
+        "    def LogLikelihoodLoss(self, intensity, event_times):\r\n",
+        "        \"\"\"\r\n",
+        "        Inputs:\r\n",
+        "            intensity (S, B) - intensity values,\r\n",
+        "            event_times (B, S) - inter-arrival times of events\r\n",
+        "        \"\"\"\r\n",
+        "\r\n",
+        "        # Compute log-likelihood of of the events that happened (first term) via sum of log-intensities \r\n",
+        "        original_loglikelihood = intensity.log().sum(dim=0)\r\n",
+        "\r\n",
+        "        #Compute log-probabilities of non-events (second term) using Monte Carlo method\r\n",
+        "\r\n",
+        "        #Calc intensity of simulated events\r\n",
+        "        sim_times = create_unifrom_d(event_times, self.device)\r\n",
+        "        sim_intesity = []\r\n",
+        "        for i in range(sim_times.shape[1]):\r\n",
+        "            sim_intesity.append(self.intensity_layer(sim_times[:,i]))\r\n",
+        "\r\n",
+        "        sim_intesity = torch.stack(sim_intesity).to(self.device)\r\n",
+        "        tot_time_seqs, seq_len = event_times.sum(dim=1), event_times.shape[1]\r\n",
+        "        mc_coef = (tot_time_seqs / seq_len)\r\n",
+        "\r\n",
+        "        simulated_likelihood = sim_intesity.sum(dim=0) * mc_coef\r\n",
+        "        \r\n",
+        "        # sum over batch\r\n",
+        "        LLH = (original_loglikelihood - simulated_likelihood).sum()\r\n",
+        "\r\n",
+        "        return -LLH"
+      ],
+      "execution_count": 11,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "43ox7WeI9BZm"
+      },
+      "source": [
+        "# model evaluation\r\n",
+        "\r\n",
+        "# X_batch dimension = (batch_size, seq_len, n_features)\r\n",
+        "N_FEATURES = 1\r\n",
+        "N_PARAMETERS = 2\r\n",
+        "N_BASIS_FUNCTIONS = 4\r\n",
+        "\r\n",
+        "model = UNIPoint(N_FEATURES, N_PARAMETERS, N_BASIS_FUNCTIONS, device).to(device)\r\n",
+        "optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)\r\n"
+      ],
+      "execution_count": 12,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "HCWGTW1phYym",
+        "outputId": "d101f4b5-deaa-44ed-b213-a3598ba10aa8"
+      },
+      "source": [
+        "epoch_list = []\r\n",
+        "loss_list = []\r\n",
+        "\r\n",
+        "for epoch in range(20):\r\n",
+        "    epoch_ll, event_num = 0, 0\r\n",
+        "\r\n",
+        "    for time, event in train_loader:\r\n",
+        "\r\n",
+        "        intensity_values = model(time.to(device), event.to(device))\r\n",
+        "        loss = model.LogLikelihoodLoss(intensity_values.to(device), time.to(device)).mean()\r\n",
+        "        optimizer.zero_grad()\r\n",
+        "        loss.backward() \r\n",
+        "        optimizer.step()\r\n",
+        "\r\n",
+        "        event_num += time.shape[0] * time.shape[1]\r\n",
+        "        epoch_ll += loss.detach().cpu().item()\r\n",
+        "\r\n",
+        "    loss_list.append(-epoch_ll/event_num)\r\n",
+        "    epoch_list.append(epoch)\r\n",
+        "\r\n",
+        "    print('Epoch:', epoch)\r\n",
+        "    print('LogLike/nats', -epoch_ll/event_num)\r\n",
+        "    print('-'*60)"
+      ],
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Epoch: 0\n",
+            "LogLike/nats -1481.2186290633056\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 1\n",
+            "LogLike/nats -675.7854453315925\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 2\n",
+            "LogLike/nats -235.00455699089417\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 3\n",
+            "LogLike/nats -54.57424181140362\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 4\n",
+            "LogLike/nats -2.0265333969924844\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 5\n",
+            "LogLike/nats -1.9830471319643215\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 6\n",
+            "LogLike/nats -1.9507670679233202\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 7\n",
+            "LogLike/nats -1.8963839889127414\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 8\n",
+            "LogLike/nats -1.85959802606939\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 9\n",
+            "LogLike/nats -1.8076356425075741\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 10\n",
+            "LogLike/nats -1.755290764610743\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 11\n",
+            "LogLike/nats -1.6913179896209953\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 12\n",
+            "LogLike/nats -1.6241494775189564\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 13\n",
+            "LogLike/nats -1.5756279018006596\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 14\n",
+            "LogLike/nats -1.496261623548969\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 15\n",
+            "LogLike/nats -1.4400726836333735\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 16\n",
+            "LogLike/nats -1.412051303024882\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 17\n",
+            "LogLike/nats -1.3654852911791537\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 18\n",
+            "LogLike/nats -1.3177831439512822\n",
+            "------------------------------------------------------------\n",
+            "Epoch: 19\n",
+            "LogLike/nats -1.277103104220544\n",
+            "------------------------------------------------------------\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 282
+        },
+        "id": "9C2FdZg8cmQB",
+        "outputId": "1f400cb1-e642-4ee5-ab9b-33031d16b758"
+      },
+      "source": [
+        "import matplotlib.pyplot as plt\r\n",
+        "\r\n",
+        "plt.plot(epoch_list,loss_list)"
+      ],
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[<matplotlib.lines.Line2D at 0x7f0d57818908>]"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 14
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "tags": [],
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "yRan7e5Xrfkf"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
