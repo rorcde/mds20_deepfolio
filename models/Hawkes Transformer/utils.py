@@ -1,4 +1,36 @@
 import torch
+import numpy as np
+
+def make_consequent_slices(raw_data, slicing_window, omit_last=True, timestamp_scaling=1e-3):
+    """
+    Function to cut the one long sequence of events into smaller ones.
+    
+    Input:
+        raw_data (N, F) - raw dataset with N samples and F features,
+        slicing_window (int) - size of the slices,
+        omit_last (bool) - omit last part of the data that is smaller than slicing_window,
+        timestamp_scaling (float) - scaling constant, which converts timestamps to seconds from its original unit
+    Output:
+        sequential_slices (B, S, F) - sliced dataset with B batches of length S with F features
+    """
+    
+    N = raw_data.shape[0]
+    raw_data[:, :2] *= timestamp_scaling
+
+    slices = []
+    for i in range(0, N, slicing_window):
+        slices.append( raw_data[i:i + slicing_window] )
+        slices[-1][0, :2] = 0.
+        slices[-1][:, 2] += 1
+    
+    if omit_last:
+        slices.pop()
+    elif slices[-1].shape[0] != slicing_window:
+        zero_padding = np.zeros(slices[-1].shape[0] - slicing_window, slices[-1].shape[1])
+        slices[-1] = np.concatenate((slices[-1], zero_padding), axis=0)
+    
+    sequential_slices = np.stack(slices, axis=0)
+    return sequential_slices
 
 def compute_integral_mc(intensity_network, hidden_states, src_padding_mask, time, events, alpha=-0.1, n_samples=100):
     """
