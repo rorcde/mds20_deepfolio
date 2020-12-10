@@ -3,7 +3,36 @@ import pickle
 import torch
 import torch.utils.data as utils_data
 
+class LobDataset(utils_data.Dataset):
+    """
+    Wrapper for LOB dataset.
+    """
+
+    def __init__(self, raw_data, slicing_window=3000, omit_last=True, timestamp_scaling=1e-3):
+        """
+        Input:
+            raw_data (N, F) - raw dataset with N samples and F features,
+            slicing_window (int) - size of the slices,
+            omit_last (bool) - omit last part of the data that is smaller than slicing_window,
+            timestamp_scaling (float) - scaling constant, which converts timestamps to seconds from its original unit
+        """
+
+        self.sliced_data = make_consequent_slices(raw_data, slicing_window, omit_last, timestamp_scaling)
+
+    def __len__(self):
+        return len(self.sliced_data)
+    
+    def __getitem__(self, index):
+
+        event_time = torch.tensor(self.sliced_data[index, :, 1])
+        event_type = torch.LongTensor(self.sliced_data[index, :, 2].astype(int))
+
+        return event_time, event_type
+
 class Dataset(utils_data.Dataset):
+    """
+    Wrapper for NHP financial dataset.
+    """
 
     def __init__(self, file_path):
         self.event_type = []
