@@ -3,6 +3,8 @@ import pickle
 import torch
 import torch.utils.data as utils_data
 
+from utils import make_consequent_slices
+
 class LobDataset(utils_data.Dataset):
     """
     Wrapper for LOB dataset.
