@@ -80,7 +80,6 @@ List of key differences compared to the <a href="https://github.com/SimiaoZuo/Tr
 * <a href="https://en.wikipedia.org/wiki/LogSumExp">LogSumExp</a> trick was used in the temporal encoding for better numerical stability;
 * No RNN layers since we found that on our dataset it does not help;
 * ReLU activation in the feed-forward network;
-* No skip connections in the feed-forward network, since the model is not too deep and we did not find that adding skip connections improved the results;
 * Additional vectorizations in some parts, combined with using PyTorch layers for Transformer, made our model almost 3 times faster (tested on the financial dataset
 from NHP): <a href="https://github.com/rodrigorivera/mds20_deepfolio/blob/main/images/our_thp.png">ours</a>,
 <a href="https://github.com/rodrigorivera/mds20_deepfolio/blob/main/images/original_thp.png">original</a>.
