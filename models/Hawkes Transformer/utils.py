@@ -19,8 +19,7 @@ def make_consequent_slices(raw_data, slicing_window, omit_last=True, timestamp_s
     slices = []
     for i in range(0, N, slicing_window):
         slices.append( raw_data[i:i + slicing_window].copy() )
-        slices[-1][:, :2] *= timestamp_scaling
-        slices[-1][0, :2] = 0.
+        slices[-1][:, :2] = (slices[-1][:, :2] - slices[-1][0, :2]) * timestamp_scaling
         slices[-1][:, 2] += 1
     
     if omit_last:
