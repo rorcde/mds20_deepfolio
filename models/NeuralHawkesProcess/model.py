@@ -143,11 +143,11 @@ class NHPModel(nn.Module):
         # compute simulated hidden states via current model parameters
         hidden_t_sim = []
         for idx, sim_duration in enumerate(range(sim_times.shape[1])):
-            _, h_t_sim = model.decay_cell(self.cell_t[idx], self.cell_target_t[idx], self.output_t[idx], self.decay_t[idx], sim_times[:,idx])
+            _, h_t_sim = self.decay_cell(self.cell_t[idx], self.cell_target_t[idx], self.output_t[idx], self.decay_t[idx], sim_times[:,idx])
             hidden_t_sim.append(h_t_sim)
 
         # find simulated intensity
-        sim_intensity = model.intensity_layer(torch.stack(hidden_t_sim))
+        sim_intensity = self.intensity_layer(torch.stack(hidden_t_sim))
 
         # calculate integral using Monte-Carlo methon (see Appendix B2)
         tot_time_seqs, seq_len = event_times.sum(dim=1), event_times.shape[1]
