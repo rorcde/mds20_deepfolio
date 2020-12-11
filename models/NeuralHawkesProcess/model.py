@@ -3,10 +3,7 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-
-import torch
-from torch import nn
-import torch.nn.functional as F
+from mds20_deepfolio.models.NeuralHawkesProcess.utils import create_unifrom_d
 
 class CTLSTMCell(nn.Module):
     """ 
