@@ -26,7 +26,7 @@ class LobDataset(utils_data.Dataset):
     
     def __getitem__(self, index):
 
-        event_time = torch.tensor(self.sliced_data[index, :, 1])
+        event_time = torch.tensor(self.sliced_data[index, :, 1], dtype=torch.float)
         event_type = torch.LongTensor(self.sliced_data[index, :, 2].astype(int))
 
         return event_time, event_type
