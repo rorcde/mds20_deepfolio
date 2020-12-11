@@ -1,25 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import time 
 import torch
+from sklearn.metrics import accuracy_score
 
-def BeginningOfStream(batch_data, type_size):
-            """
-              While initializing LSTM we have it read a special beginning-of-stream (BOS) event (k0, t0), 
-              where k0 is a special event type and t0 is set to be 0 
-              (expanding the LSTM’s input dimensionality by one) see Appendix A.2
-            """
-
-            seq_events, seq_time, seq_tot_time, seqs_len = batch_data
-
-            pad_event = torch.zeros_like(seq_events[:,0]) + type_size
-            pad_time = torch.zeros_like(seq_time[:,0])
-            pad_event_seqs = torch.cat((pad_event.reshape(-1,1), seq_events), dim=1)
-            pad_time_seqs = torch.cat((pad_time.reshape(-1,1), seq_time), dim=1)
-
-            return pad_event_seqs.long(), pad_time_seqs, seq_tot_time, seqs_len
-
-def run_epoch(model, optimizer, criterion, dataloader, device, mode = 'train'):
+def run_epoch(model, optimizer, dataloader, device, mode = 'train', sum_losses=True, scale=0.001):
     if mode == 'train':
       model.train(True)
     else:
@@ -27,66 +10,75 @@ def run_epoch(model, optimizer, criterion, dataloader, device, mode = 'train'):
 
     is_train = (mode == 'train')
     epoch_loss, event_num = 0, 0
-    with torch.set_grad_enabled(is_train):
-        for sample in dataloader:
+    epoch_llh, epoch_time_error, epoch_event_error, event_num, epoch_event_acc = 0, 0, 0, 0, 0
+    with torch.set_grad_enabled(is_train):        
+        for event_seq, time_seq in dataloader:
 
-            event_seqs, time_seqs, total_time_seqs, seqs_length = BeginningOfStream(sample, model.type_size)
-            output = model.forward(event_seqs.to(device), time_seqs.to(device))
-            loss = criterion(model, event_seqs.to(device), time_seqs, seqs_length,
-                                              total_time_seqs.to(device), output)
+            event_seq, time_seq = event_seq.to(device), time_seq.to(device)
+            intens, time, event = model.forward(event_seq, time_seq)
 
+            # Log-likelihood (loss for the whole sequence)
+            loss_llh = model.LogLikelihoodLoss(intens, time_seq)
+
+            if sum_losses:
+                # time and type prediction losses
+                loss_time = model.time_loss(time, time_seq)
+                loss_event = model.event_loss(event, event_seq)
+                loss = loss_llh + loss_time + scale * loss_event
+
+                # log results
+                epoch_event_error += loss_event.detach().cpu().numpy()
+                epoch_time_error += loss_time.detach().cpu().numpy()
+                epoch_event_acc += accuracy_score(event[:,:-1].argmax(dim=2).cpu().reshape(-1), 
+                                                  event_seq[:, 1:].cpu().reshape(-1))
+
+            else:
+                loss = loss_llh
+                
             if is_train:
                 optimizer.zero_grad()
                 loss.backward() 
                 optimizer.step()
 
-            batch_event_num = torch.sum(seqs_length)
-            epoch_loss += loss.detach().cpu().numpy()
-            event_num += batch_event_num
+            epoch_llh += loss_llh.detach().cpu().numpy()
+            event_num += time_seq.shape[0] * time_seq.shape[1]
 
-    return epoch_loss/event_num
+    if sum_losses:
+        return epoch_llh/event_num, epoch_time_error/len(dataloader), epoch_event_error/len(dataloader), epoch_event_acc/len(dataloader)
+    else:
+        return epoch_llh/event_num
 
 
-def train(model, optimizer, criterion, train_loader, val_loader, device, n_epochs=50, eval_pred=False, save_path=None):
+def train(model, optimizer, train_loader, val_loader, device, n_epochs=50, sum_losses=True, save_path=None, verbose_epoch=1):
     
     
     start = time.time()
     best_loss = 10e15
-    loss_history = {'train': [], 'val': []}
-    time_mse_error_history = {'train': [], 'val': []}
-    type_accuracy_history = {'train': [], 'val': []}
+    statistics = {'train': [], 'val': []}
     for epoch in range(n_epochs):
 
-        train_loss = run_epoch(model, optimizer, criterion, train_loader, device, mode = 'train')
-        val_loss = run_epoch(model, None, criterion, val_loader, device, mode = 'val')
+        train_stats = run_epoch(model, optimizer, train_loader, device, mode = 'train',sum_losses=sum_losses)
+        val_stats = run_epoch(model, None, val_loader, device, mode = 'val',sum_losses=sum_losses)
 
-        if eval_pred:
-          #time_mse_error_train, type_accuracy_train = evaluate_prediction(model, train_loader)
-          time_mse_error_val, type_accuracy_val = evaluate_prediction(model, val_loader, device)
-        train_val_time = time.time() - start
-        
-        loss_history['train'].append(train_loss)
-        loss_history['val'].append(val_loss)
+        train_val_time = time.time() - start 
+        statistics['train'].append(train_stats)
+        statistics['val'].append(val_stats)
 
-        #time_mse_error_train_history['train'].append(time_mse_error_train)
-       # time_mse_error_history['val'].append(time_mse_error_val)
-
-        #type_accuracy_train_history['train'].append(type_accuracy_train)
-        #type_accuracy_history['val'].append(type_accuracy_val)
-
-        if val_loss < best_loss:
-            best_loss = val_loss
-            if save_path:
+        if save_path:
+            if statistics['val'][-1][0] < best_loss:
+                best_loss = statistics['val'][-1][0]
                 torch.save(model.state_dict(), save_path)
 
-        if epoch % 1 == 0:
+        if epoch % verbose_epoch == 0:
             print('Epoch:', epoch)
-            print('train_log_likelihood:', -train_loss, 'val_log_likelihood', -val_loss)
-
-            if eval_pred:
-                print('time_mse_error_val:', time_mse_error_val, 'type_accuracy_val:', type_accuracy_val)
-
+            if sum_losses:
+                print('Log-Likelihood:: train:', -statistics['train'][-1][0], ', val:', -statistics['val'][-1][0])
+                print('Time MSE:: train:', statistics['train'][-1][1], ', val:', statistics['val'][-1][1])
+                print('Event CE:: train:', statistics['train'][-1][2], ', val:', statistics['val'][-1][2])    
+                print('Event pred accuracy:: train:', statistics['train'][-1][3], ', val:', statistics['val'][-1][3])    
+            else:
+                print('Log-Likelihood:: train:', -statistics['train'][-1], ', val:', -statistics['val'][-1])
             print('time:', train_val_time)
             print('-'*60)
 
-    return loss_history, time_mse_error_history, type_accuracy_history
+    return statiscs
