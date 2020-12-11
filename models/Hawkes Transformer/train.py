@@ -52,6 +52,7 @@ def run_epoch(model, dataloader, device, optimizer=None):
     return ll_loss_epoch, tp_loss_epoch, ec_loss_epoch, accuracy
 
 def train(model, n_epochs, optimizer, train_loader, val_loader, scheduler=None, device=None, verbose=True, freq=None):
+    
     if verbose and freq is None:
         freq = max(n_epochs // 10, 1)
     if device is None:
@@ -77,7 +78,10 @@ def train(model, n_epochs, optimizer, train_loader, val_loader, scheduler=None, 
         val_accuracy_history.append( val_accuracy )
 
         if scheduler is not None:
-            scheduler.step()
+            if type(scheduler).__name__ != 'ReduceLROnPlateau':
+                scheduler.step()
+            else:
+                scheduler.step( -val_loss_ll + val_loss_tp + val_loss_ec )
         
         time_epoch_end = t.time() - time_start
 
