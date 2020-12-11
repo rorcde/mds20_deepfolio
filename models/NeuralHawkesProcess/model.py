@@ -206,7 +206,7 @@ class NHPModel(nn.Module):
             event_pred (batch_size, seq_len, n_events) - next event type predictions
         """
 
-        batch_size, batch_len = event_seqs.shape
+        batch_size, batch_len = event_seq.shape
 
         # initialize hidden states
         self.init_states(batch_size)
