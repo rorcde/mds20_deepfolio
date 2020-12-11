@@ -3,6 +3,33 @@ import torch
 from torch import nn
 import numpy as np
 
+def create_unifrom_d(event_times, device = None):
+  
+    """
+    Create uniform distribution of t from given event sequenses
+    Input:
+        event_times (batch_size, seq_len) - inter-arrival times of events
+    Output:
+        sim_inter_times (batch_size, seq_len) - simulated inter-arrival times of events
+    """
+
+    batch_size, batch_len = event_times.shape
+    sim_inter_times = []
+    tot_time_seqs = event_times.sum(dim=1)
+    for tot_time in tot_time_seqs:
+
+          # create t ∼ Unif(0, T)
+          sim_time_seqs = torch.zeros(batch_len).uniform_(0,tot_time_seqs[0])
+
+          # calc inter-arrival times
+          sim_inter_time = torch.zeros(batch_len)
+          sim_inter_time[1:] = abs(sim_time_seqs[1:] - sim_time_seqs[:-1])
+          sim_inter_times.append(sim_inter_time)
+
+    sim_inter_times = torch.stack(sim_inter_times)
+    return sim_inter_times.to(device) if device != None else sim_inter_times
+
+
 class LogLikelihoodLoss(nn.Module):
     def __init__(self, device=None):
         super(LogLikelihoodLoss, self).__init__()
