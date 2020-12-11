@@ -58,7 +58,6 @@ def collate_fn(batch, n_events=2):
       """
       seq_time = torch.stack([sample[0] for sample in batch])
       seq_events = torch.stack([sample[1] for sample in batch])
-      print(seq_time.shape)
 
       pad_event = torch.zeros_like(seq_events[:,0]) + n_events
       pad_time = torch.zeros_like(seq_time[:,0])
