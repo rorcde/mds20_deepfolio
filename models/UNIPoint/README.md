@@ -5,7 +5,7 @@
 <p align="center">
   <a href="#architecture">Architecture</a> •
   <a href="#implementation-details">Implementation details</a> •
-  <a href="#loss-function">Loss function</a> •
+  <a href="#loss-function">Loss function</a>
 </p>
 
 ## Architecture
