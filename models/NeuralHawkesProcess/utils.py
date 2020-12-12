@@ -2,6 +2,7 @@
 import torch
 from torch import nn
 import numpy as np
+import matplotlib.pyplot as plt
 
 def create_unifrom_d(event_times, device = None):
   
@@ -200,3 +201,20 @@ def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
                             time_between_events.cpu().numpy(), intensity.cpu().numpy()
         
         
+def plot_stats(stats):
+    fig, ax = plt.subplots(1,3,figsize=(20,5))
+
+    train, val = np.array(stats['train']), np.array(stats['val'])
+    ax[0].plot(-train[:,0], c = 'r', label = 'train')
+    ax[0].plot(-val[:,0], c = 'b', label = 'val')
+    ax[0].set(xlabel='Epoch', ylabel='Log-likelihood/nats', title='Log-likelihood')
+
+    ax[1].plot(train[:,1]**0.5, c = 'r', label = 'train')
+    ax[1].plot(val[:,1]**0.5, c = 'b', label = 'val')
+    ax[1].set(xlabel='Epoch', ylabel='RMSE', title='time RMSE')
+
+    ax[2].plot(train[:,3], c = 'r', label = 'train')
+    ax[2].plot(val[:,3], c = 'b', label = 'val')
+    ax[2].set(xlabel='Epoch', ylabel='accuracy', title='Type accuracy')
+    plt.legend()
+    plt.show()
