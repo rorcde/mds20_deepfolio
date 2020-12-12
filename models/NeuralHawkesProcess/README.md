@@ -104,6 +104,15 @@ terms for time regression and event type classification:
 
 ## Implementation details
 
+* Updates to LSTM states was done using *nn.Linear* layers with combination of corresponding activation functions:
+
+  - <a href=""><img src="https://latex.codecogs.com/svg.latex?\sigma" /></a> - *torch.sigmoid*, 
+  - <a href=""><img src="https://latex.codecogs.com/svg.latex?2\sigma" /></a> - *torch.tanh*, 
+  - <a href=""><img src="https://latex.codecogs.com/svg.latex?f" /></a> - *F.softplus*, 
+
+* Computation of log likelihood loss was done using Monte-Carlo method, according to authors suggestions in Appendix B1-B2
+* In addition for prediction time and type of next event, instead using probability function - two *nn.Linear* layers were added for this purpose
+
 ## Files
 
 * **model.py** - contains NHP architecture (with two linear layers as predictors),
