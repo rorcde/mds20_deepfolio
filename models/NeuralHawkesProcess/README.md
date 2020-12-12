@@ -7,7 +7,6 @@
   <a href="#loss-function">Loss function</a> •
   <a href="#implementation-details">Implementation details</a> •
   <a href="#files">Files</a> •
-  <a href="#model-weights">Model weights</a>
 </p>
 
 ## Architecture
@@ -112,3 +111,5 @@ terms for time regression and event type classification:
 * **DataWrapper.py.py** - contains code for the dataset wrapper which feeds data in a required manner to the network,
 * **utils.py** - utility functions,
 * **NHP_exp2.ipynb** - contains experiment on the financial data from NHP paper
+* folder **weights** - contains model weights
+
