@@ -1,4 +1,4 @@
-<h2 align="center"> <a href="https://arxiv.org/pdf/1612.09328.pdf">Neural Hawkes Process</a>: </h2>
+<h2 align="center"> <a href="https://arxiv.org/pdf/1612.09328.pdf">Neural Hawkes Process</a> </h2>
 
 <h4 align="center"> Content </h4>
 
