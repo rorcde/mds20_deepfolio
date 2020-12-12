@@ -6,8 +6,6 @@
   <a href="#architecture">Architecture</a> •
   <a href="#implementation-details">Implementation details</a> •
   <a href="#loss-function">Loss function</a> •
-  <a href="#files">Files</a> •
-  <a href="#model-weights">Model weights</a>
 </p>
 
 ## Architecture
