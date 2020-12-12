@@ -11,70 +11,26 @@ import torch
 from torch import nn
 import numpy as np
 
-class LikelihoodLoss(nn.Module):
-    def __init__(self, device=None):
-        super(LikelihoodLoss, self).__init__()
-        self.device = device
+def create_unifrom_d(event_times, device = None):
+    """
+    Create uniform distribution of t from given event sequenses
+    Inputs:
+        event_times (B, T) - inter-arrival times of events
+    """
 
-    def create_unif_d(self, batch_length, total_time_seqs):
+    batch_size, batch_len = event_times.shape
+    sim_inter_times = []
+    tot_time_seqs = event_times.sum(dim=1)
+    for tot_time in tot_time_seqs:
 
-        sim_time_seqs = []
-        for tot_time in total_time_seqs:
-            sim_time_seqs.append(torch.rand(batch_length).uniform_(0,total_time_seqs[0]))
-        sim_time_seqs = torch.stack(sim_time_seqs)
-        sim_time_seqs = sim_time_seqs.transpose(1,0)
-        if self.device:
-            sim_time_seqs = sim_time_seqs.to(self.device)
+          sim_time_seqs = torch.zeros(batch_len).uniform_(0,tot_time)
+          sim_inter_time = torch.zeros(batch_len)
+          sim_inter_time[1:] = abs(sim_time_seqs[1:] - sim_time_seqs[:-1])
+          sim_inter_times.append(sim_inter_time)
 
-        return sim_time_seqs
+    if device != None:
+        sim_inter_times = torch.stack(sim_inter_times).to(device)
+    else: 
+        sim_inter_times = torch.stack(sim_inter_times)
 
-    def forward(self, model, event_seqs, time_seqs, seqs_length, total_time_seqs, output, batch_first=True):
-
-        batch_size, batch_length = event_seqs.shape
-        hidden_t, cell_t, cell_target_t, output_t, decay_t = [torch.squeeze(torch.stack(val), 0) for val in output]
-        
-
-        """ Compute likelihood of of the events that happened (first term) via multiplication of intensities """
-
-        intensity = model.intensity_layer(hidden_t) # need to create it as one layer !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        first_term = 0
-        for idx, (event_seq, seq_len) in enumerate(zip(event_seqs, seqs_length)):
-            arr = torch.arange(seq_len)
-            pos_events = event_seq[1:seq_len+1]
-            first_term *= intensity[arr, idx, pos_events].sum()
-
-
-
-#        intensity = model.intensity_layer(hidden_t)
-#        log_intensity = intensity.log()
-#        #shape - S * bs * H
-
-#        original_loglikelihood = 0
-#        for idx, (event_seq, seq_len) in enumerate(zip(event_seqs, seqs_length)):
-#            arr = torch.arange(seq_len)
-#            pos_events = event_seq[1:seq_len+1]
-#            original_loglikelihood += log_intensity[arr, idx, pos_events].sum()
-
-
-        """ Compute log-probabilities of non-events using Monte Carlo method (see Appendix B2) """
-
-        ### 1) Create t ∼ Unif(0, T)
-        sim_time_seqs = self.create_unif_d(batch_length, total_time_seqs)
-
-        ### 2) Find intensities for simulated events
-        hidden_t_sim = []
-        for idx, sim_duration in enumerate(sim_time_seqs):
-            _, h_t_sim = model.decay_cell(cell_t[idx], cell_target_t[idx], output_t[idx], decay_t[idx], sim_duration)
-            hidden_t_sim.append(h_t_sim)            
-        sim_intensity = model.intensity_layer(torch.stack(hidden_t_sim))
-
-        ### 2) Caclulate integral using Monte Carlo method
-        MC_integral = 0
-        for idx, (total_time, seq_len) in enumerate(zip(total_time_seqs, seqs_length)):
-            mc_coefficient = total_time / (seq_len)
-            arr = torch.arange(seq_len)
-            MC_integral += mc_coefficient * sim_intensity[arr, idx, :].sum(dim=(1,0))
-
-        likelihood = first_term*torch.exp(MC_integral)
-        return -likelihood
+    return sim_inter_times
