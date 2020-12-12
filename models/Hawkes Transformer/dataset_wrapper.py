@@ -3,26 +3,51 @@ import pickle
 import torch
 import torch.utils.data as utils_data
 
-from utils import make_consequent_slices
+import numpy as np
+
+from utils import make_consequent_slices, preprocess_sliced_data
 
 class LobDataset(utils_data.Dataset):
     """
     Wrapper for LOB dataset.
     """
 
-    def __init__(self, raw_data, slicing_window=3000, omit_last=True, timestamp_scaling=1e-3):
+    def __init__(self, raw_data, slice_inputs=True, preprocess=True, slicing_window=3000, omit_last=True, ts_scaling=1e-3):
         """
         Input:
-            raw_data (N, F) - raw dataset with N samples and F features,
+            raw_data (N, 3)    - either raw dataset with N samples and 3 features (interarrival_time, time_from_start, event_type)
+                     (B, S, 3) - or batch of sequences
+            slice_inputs (bool) - indicator showing whether the data needs to be sliced into sequences or not,
+            preprocess (bool) - indicator showing whether sliced data needs to be preprocessed,
             slicing_window (int) - size of the slices,
             omit_last (bool) - omit last part of the data that is smaller than slicing_window,
-            timestamp_scaling (float) - scaling constant, which converts timestamps to seconds from its original unit
+            ts_scaling (float) - scaling constant, which converts timestamps to seconds from its original unit
         """
 
-        self.sliced_data = make_consequent_slices(raw_data, slicing_window, omit_last, timestamp_scaling)
+        self.slice_inputs = slice_inputs
+        self.preprocess = preprocess
+        self.slicing_window = slicing_window
+        self.omit_last = omit_last
+        self.ts_scaling = ts_scaling
+
+        self.sliced_data = make_consequent_slices(raw_data, slicing_window, omit_last) if slice_inputs else raw_data
+        self.sliced_data = preprocess_sliced_data(self.sliced_data, ts_scaling) if preprocess else self.sliced_data
 
     def __len__(self):
         return len(self.sliced_data)
+    
+    def expand(self, external_data):
+        """
+        Expand dataset.
+
+        Input:
+            external_data (N, 3) / (B, S, 3) - additional data to be added
+        """
+        
+        additional_data = make_consequent_slices(external_data, self.slicing_window, self.omit_last) if self.slice_inputs else external_data
+        additional_data = preprocess_sliced_data(additional_data, self.ts_scaling) if self.preprocess else additional_data
+
+        self.sliced_data = np.concatenate((self.sliced_data, additional_data), axis=0)
     
     def __getitem__(self, index):
 
