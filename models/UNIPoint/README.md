@@ -1,4 +1,4 @@
-<h2 align="center"> Transformer Hawkes Process </h2>
+<h2 align="center"> UNIPoint </h2>
 
 <h4 align="center"> Content </h4>
 
