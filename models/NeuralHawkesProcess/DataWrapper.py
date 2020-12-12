@@ -44,6 +44,28 @@ class NHPDataset(Dataset):
         
         return delta_time, event_type
 
+    
+class LOBDataset(Dataset):
+    def __init__(self, file_path):
+        self.event_type = []
+        self.event_time = []
+        
+        seqs = np.load(file_path)
+
+        for seq in seqs:
+            self.event_type.append(torch.Tensor(seq[:,2]))
+            self.event_time.append(torch.Tensor(seq[:,0])/1000)
+
+    def __len__(self):
+        return len(self.event_type)
+    
+    def __getitem__(self, index):
+
+        event_type = torch.LongTensor(self.event_type[index].long())
+        event_time = torch.Tensor(self.event_time[index])
+        
+        return event_time, event_type
+
 def collate_fn(batch, n_events=2):
 
       """
