@@ -5,9 +5,10 @@ Original file is located at
     https://colab.research.google.com/drive/15YYfs_DCyUp_SyK2vJpqWnPB3Czw2LAJ
 """
 
+import pickle
+import numpy as np
 import torch
 from torch.utils.data import Dataset
-import pickle
 
 class NHPDataset(Dataset):
     ''' 
