@@ -81,4 +81,4 @@ def train(model, optimizer, train_loader, val_loader, device, n_epochs=50, sum_l
             print('time:', train_val_time)
             print('-'*60)
 
-    return statiscs
+    return statistics
