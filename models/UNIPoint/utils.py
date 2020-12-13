@@ -7,6 +7,8 @@ Original file is located at
     https://colab.research.google.com/drive/1PZ2_u9PeZz9UZ-0m_5KboKoyds-BrSbj
 """
 
+import glob
+
 import torch
 from torch import nn
 import numpy as np
@@ -34,3 +36,20 @@ def create_unifrom_d(event_times, device = None):
         sim_inter_times = torch.stack(sim_inter_times)
 
     return sim_inter_times
+
+class TupoDataset(Dataset):
+    def __init__(self, data_folder, data_type = '.npy'):
+
+        self.file_paths = glob.glob(data_folder+'*'+data_type)
+        
+    def __len__(self):
+
+        return len(self.file_paths)
+    
+    def __getitem__(self, index):
+
+        sample = np.load(self.file_paths[index])
+        event_time = torch.Tensor(sample[0,:])
+        event_type = torch.LongTensor(sample[1,:])
+        
+        return event_time, event_type
