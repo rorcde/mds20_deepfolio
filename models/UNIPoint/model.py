@@ -98,7 +98,7 @@ class UNIPoint(nn.Module):
               # calculating numbers of parameters to take for basis function
               par1 = 2 * function
               par2 = 2 * function + 1
-              self.basis_res[:, function] = self.ReLU(par1, par2, tau) 
+              self.basis_res[:, function] = self.PowerLaw(par1, par2, tau) 
           
           self.sum_res = torch.sum(self.basis_res, 1)
           intensity = self.Softplus(self.sum_res)
