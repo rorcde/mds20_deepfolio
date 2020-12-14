@@ -18,9 +18,9 @@ def prepare_datasets(data_directory, train_size=0.6, val_size=0.2):
     for (name, dset) in datasets.items():
         train_part, val_part = int(train_size * len(dset)), int(val_size * len(dset))
 
-        train_dsets[name] = LobDataset(dset[:train_part], slice_inputs=False)
-        val_dsets[name]   = LobDataset(dset[train_part:train_part + val_part], slice_inputs=False)
-        test_dsets[name]  = LobDataset(dset[train_part + val_part:], slice_inputs=False)
+        train_dsets[name[:3]] = LobDataset(dset[:train_part], slice_inputs=False)
+        val_dsets[name[:3]]   = LobDataset(dset[train_part:train_part + val_part], slice_inputs=False)
+        test_dsets[name[:3]]  = LobDataset(dset[train_part + val_part:], slice_inputs=False)
     return train_dsets, val_dsets, test_dsets
 
 class LobDataset(utils_data.Dataset):
