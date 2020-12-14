@@ -15,10 +15,13 @@ from torch import optim
 import numpy as np
 
 def create_unifrom_d(event_times, device = None):
+  
     """
     Create uniform distribution of t from given event sequenses
-    Inputs:
-        event_times (B, T) - inter-arrival times of events
+    Input:
+        event_times (batch_size, seq_len) - inter-arrival times of events
+    Output:
+        sim_inter_times (batch_size, seq_len) - simulated inter-arrival times of events
     """
 
     batch_size, batch_len = event_times.shape
@@ -26,17 +29,16 @@ def create_unifrom_d(event_times, device = None):
     tot_time_seqs = event_times.sum(dim=1)
     for tot_time in tot_time_seqs:
 
-          sim_time_seqs = torch.zeros(batch_len).uniform_(0,tot_time)
+          # create t ∼ Unif(0, T)
+          sim_time_seqs = torch.sort(torch.zeros(batch_len).uniform_(0,tot_time)).values
+
+          # calc inter-arrival times
           sim_inter_time = torch.zeros(batch_len)
-          sim_inter_time[1:] = abs(sim_time_seqs[1:] - sim_time_seqs[:-1])
+          sim_inter_time[1:] = sim_time_seqs[1:] - sim_time_seqs[:-1]
           sim_inter_times.append(sim_inter_time)
 
-    if device != None:
-        sim_inter_times = torch.stack(sim_inter_times).to(device)
-    else: 
-        sim_inter_times = torch.stack(sim_inter_times)
-
-    return sim_inter_times
+    sim_inter_times = torch.stack(sim_inter_times)
+    return sim_inter_times.to(device) if device != None else sim_inter_times
 
 class UNIPoint(nn.Module):
     def __init__(self, n_features, n_parameters, n_basis_functions, device, hidden_size=256):
