@@ -63,8 +63,7 @@ class UNIPoint(nn.Module):
       """Function to apply Rectified Linear Unit (ReLU) as basis function inside network 
         Input parameters:
           parameters - alpha, beta for basis function's value calculation
-          time - column-vector with time which had been spent since the begining of 
-                  temporal point process (TPP)
+          time - column-vector with interarrival time between events of temporal point process (TPP)
       """
       self.output = torch.relu(self.parameters[:,parameter_1] * time + self.parameters[:,parameter_2] ) 
       return self.output
@@ -73,8 +72,7 @@ class UNIPoint(nn.Module):
       """Function to apply Power Law (PL) as basis function inside network 
         Input parameters:
           parameters - alpha, beta for basis function's value calculation
-          time - column-vector with time which had been spent since the begining of 
-                  temporal point process (TPP)
+          time - column-vector with interarrival time between events of temporal point process (TPP)
       """
       self.output = self.parameters[:,parameter_1] * (1 + time)**( - self.parameters[:,parameter_2])
       return self.output
@@ -83,8 +81,7 @@ class UNIPoint(nn.Module):
       """Function to apply Exponential function as basis function inside network 
         Input parameters:
           parameters - alpha, beta for basis function's value calculation
-          time - column-vector with time which had been spent since the begining of 
-                  temporal point process (TPP)
+          time - column-vector with interarrival time between events of temporal point process (TPP)
       """
       self.output = self.parameters[:,parameter_1] * torch.exp(self.parameters[:, parameter_2] * time)
       return self.output
