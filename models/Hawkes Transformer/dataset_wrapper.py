@@ -11,8 +11,8 @@ from utils import make_consequent_slices, preprocess_sliced_data
 def prepare_datasets(data_directory, train_size=0.6, val_size=0.2):
 
     datasets = {}
-    for file in os.listdir(data_directory):
-        datasets[file.split('_')[2][:3]] = np.load(data_directory + file)
+    for filename in os.listdir(data_directory):
+        datasets[filename] = np.load(data_directory + filename)
     
     train_dsets, val_dsets, test_dsets = {}, {}, {}
     for (name, dset) in datasets.items():
