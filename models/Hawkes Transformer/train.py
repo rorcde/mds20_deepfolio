@@ -67,7 +67,7 @@ def run_epoch(model, dataloader, device, optimizer=None):
     return ll_loss_epoch, tp_loss_epoch, ec_loss_epoch, accuracy
 
 def train(model, n_epochs, optimizer, train_loader, val_loader, scheduler=None, device=None, verbose=True, freq=None,\
-          early_stopping=False, stopping_criterion='min_loss', patience=20, checkpoint=True):
+          early_stopping=False, stopping_criterion='min_loss', patience=20, checkpoint=True, cp_name=None):
     """
     Training function for the Transformer Hawkes Process model.
 
@@ -84,7 +84,8 @@ def train(model, n_epochs, optimizer, train_loader, val_loader, scheduler=None, 
         early_stopping (bool) - apply early stopping or not,
         stopping_criterion (string) - which stopping criterion to apply for early stopping and scheduler ('min_loss' or 'max_accuracy'),
         patience (int) - num of epochs where criterion does not improve before training is stopped,
-        checkpoint (bool) - apply checkpointing or not (if early stopping is active, then saving is performed only on best iterations)
+        checkpoint (bool) - apply checkpointing or not (if early stopping is active, then saving is performed only on best iterations),
+        cp_name (string) - name for checkpoint
     Output:
         train_history (list) - list of loss and accuracy values on the training set,
         val_history (list) - list of loss and accuracy values on the validation set
@@ -95,6 +96,9 @@ def train(model, n_epochs, optimizer, train_loader, val_loader, scheduler=None, 
     
     if device is None:
         device = GLOBAL_DEVICE
+    
+    if cp_name is None:
+        cp_name = 'model'
     
     assert stopping_criterion != 'min_loss' or stopping_criterion != 'max_accuracy', "Unknown stopping criterion, choose one of 'min_loss' or 'max_accuracy'"
 
@@ -142,14 +146,14 @@ def train(model, n_epochs, optimizer, train_loader, val_loader, scheduler=None, 
             best_criterion_value = criterion_value
 
             if checkpoint:
-                torch.save(model.state_dict(), 'model_best.pth')
+                torch.save(model.state_dict(), '{}.pth'.format(cp_name))
         
         if bad_epochs > patience:
             print("Patience limit for early stopping has been reached, terminating training.")
             break
         
         if not early_stopping and checkpoint:
-            torch.save(model.state_dict(), 'model_best.pth')
+            torch.save(model.state_dict(), '{}.pth'.format(cp_name))
 
     train_history = {
         'log-likelihood' : train_loss_ll_history,
