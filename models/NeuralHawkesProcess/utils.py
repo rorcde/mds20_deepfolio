@@ -20,16 +20,16 @@ def create_unifrom_d(event_times, device = None):
     for tot_time in tot_time_seqs:
 
           # create t ∼ Unif(0, T)
-          sim_time_seqs = torch.zeros(batch_len).uniform_(0,tot_time_seqs[0])
+          sim_time_seqs = torch.sort(torch.zeros(batch_len).uniform_(0,tot_time)).values
 
           # calc inter-arrival times
           sim_inter_time = torch.zeros(batch_len)
-          sim_inter_time[1:] = abs(sim_time_seqs[1:] - sim_time_seqs[:-1])
+          sim_inter_time[1:] = sim_time_seqs[1:] - sim_time_seqs[:-1]
           sim_inter_times.append(sim_inter_time)
 
     sim_inter_times = torch.stack(sim_inter_times)
     return sim_inter_times.to(device) if device != None else sim_inter_times
-
+  
 
 class LogLikelihoodLoss(nn.Module):
     def __init__(self, device=None):
