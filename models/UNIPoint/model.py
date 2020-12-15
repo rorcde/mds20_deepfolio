@@ -100,8 +100,8 @@ class UNIPoint(nn.Module):
               # calculating numbers of parameters to take for basis function
               par1 = 2 * function
               par2 = 2 * function + 1
-              if par1 % 3 == 0:
-                
+              #if par1 % 3 == 0:
+          
               self.basis_res[:, function] = self.Exponential(par1, par2, tau) 
               
           self.sum_res = torch.sum(self.basis_res, 1)
