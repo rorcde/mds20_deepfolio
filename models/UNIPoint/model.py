@@ -103,8 +103,7 @@ class UNIPoint(nn.Module):
               self.basis_res[:, function] = self.PowerLaw(par1, par2, tau) 
               
           self.sum_res = torch.sum(self.basis_res, 1)
-          print("self.sum_res", self.sum_res)
-          intensity = self.Softplus(self.sum_res)
+          intensity = self.Softplus(self.sum_res) * 0.0000001
 
           return intensity
 
