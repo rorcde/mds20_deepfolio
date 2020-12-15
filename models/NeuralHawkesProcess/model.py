@@ -147,12 +147,13 @@ class NHPModel(nn.Module):
             hidden_t_sim.append(h_t_sim)
 
         # find simulated intensity
-        sim_intensity = self.intensity_layer(torch.stack(hidden_t_sim))
-
+        hidden_t_sim = torch.transpose(torch.stack(hidden_t_sim), 0,1)
+        sim_intensity = self.intensity_layer(hidden_t_sim)
+          
         # calculate integral using Monte-Carlo methon (see Appendix B2)
         tot_time_seqs, seq_len = event_times.sum(dim=1), event_times.shape[1]
         mc_coef = (tot_time_seqs / seq_len).to(self.device)
-        simulated_likelihood = sim_intensity.sum(dim=(0,2)) * mc_coef
+        simulated_likelihood = sim_intensity.sum(dim=(1,2)) * mc_coef
         
         # sum over batch
         LLH = (original_loglikelihood.sum(dim=1) - simulated_likelihood).sum()
