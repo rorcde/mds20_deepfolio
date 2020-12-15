@@ -22,6 +22,14 @@ Usually, when one deals with <a href="https://www.investopedia.com/terms/l/limit
 
 ## Setup
 
+Clone GitHub repository:
+
+```
+git clone https://github.com/rodrigorivera/mds20_deepfolio
+```
+
+Make sure that all dependencies are installed.
+
 ## Content
 
 This repository contains the codebase for the project, its structure is the following:
