@@ -101,8 +101,10 @@ class UNIPoint(nn.Module):
               par1 = 2 * function
               par2 = 2 * function + 1
               self.basis_res[:, function] = self.PowerLaw(par1, par2, tau) 
+              print("self.basis_res[:, function]", self.basis_res[:, function])
           
           self.sum_res = torch.sum(self.basis_res, 1)
+          print("self.sum_res", self.sum_res)
           intensity = self.Softplus(self.sum_res)
 
           return intensity
