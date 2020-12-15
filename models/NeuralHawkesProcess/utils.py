@@ -25,6 +25,7 @@ def create_unifrom_d(event_times, device = None):
           # calc inter-arrival times
           sim_inter_time = torch.zeros(batch_len)
           sim_inter_time[1:] = sim_time_seqs[1:] - sim_time_seqs[:-1]
+          np.random.shuffle(sim_inter_time) 
           sim_inter_times.append(sim_inter_time)
 
     sim_inter_times = torch.stack(sim_inter_times)
