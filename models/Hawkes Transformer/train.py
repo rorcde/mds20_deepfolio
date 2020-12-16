@@ -148,7 +148,7 @@ def train(model, n_epochs, optimizer, train_loader, val_loader, scheduler=None, 
             if checkpoint:
                 torch.save(model.state_dict(), '{}.pth'.format(cp_name))
         
-        if bad_epochs > patience:
+        if early_stopping and bad_epochs > patience:
             print("Patience limit for early stopping has been reached, terminating training.")
             break
         
