@@ -137,7 +137,10 @@ def evaluate_prediction(model, dataloader, device):
         return time_mse_error, type_accuracy
     
 
-def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
+from sklearn.metrics import accuracy_score, mean_squared_error
+
+
+def predict_event(model, seq_time, seq_events, device, hmax = 40,
                      n_samples=1000):
         """ 
         Predict last event time and type for the given sequence 
@@ -146,7 +149,7 @@ def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
             model - NHP model to compute decay states for sequence
             seq_time - torch.tensor with time diffs between events in sequence
             seq_events - torch.tensor with event types for each time point
-            seq_lengths - lengths of the sequence
+            seq_length - length of the sequence
         
         Output:
             pred_dt - predicted dt for next event
@@ -158,48 +161,62 @@ def predict_event(model, seq_time, seq_events, seq_lengths, device, hmax = 40,
         """
 
         """ Feed the model with sequence and compute decay cell state """
+        seq_length = seq_time.shape[0]-1
 
-        timestamps = seq_time.cumsum(dim=0).to(device)
+        types_gt, types_pred = [], []
+        times_gt, times_pred = [], []
         with torch.no_grad():
-            model.init_states(1)
-            for i in range(seq_lengths):
-                c_t, c_target, output, decay = model.LSTM_cell(model.Embedding(seq_events[i].to(device)).unsqueeze(0), model.hidden_decay, 
-                                                               model.cell_decay, model.cell_target)
 
-                if i < seq_lengths - 1:
-                    c_t = c_t * torch.exp(-decay * seq_time[i, None].to(device)) 
-                    h_t = output * torch.tanh(c_t)
+            h_t = torch.zeros(1, model.hidden_size, dtype=torch.float, device=device)
+            c_t = torch.zeros(1, model.hidden_size, dtype=torch.float, device=device)
+            c_target = torch.zeros(1, model.hidden_size, dtype=torch.float, device=device)
 
-            # gt last and one before last event types and times
-            last_t, gt_t = timestamps[i], timestamps[i + 1]
-            last_type, gt_type = seq_events[i], seq_events[i + 1]
-            gt_dt = seq_time[i]
+            for i in range(1,seq_length):
+                c_t, c_target, output, decay = model.CTLSTM_cell(model.Embedding(seq_events[i].to(device)).unsqueeze(0), h_t, 
+                                                               c_t, c_target)
 
+                c_t = c_t * torch.exp(-decay * seq_time[i, None].to(device)) 
+                h_t = output * torch.tanh(c_t)
 
-            """ Make prediction for the next event time and type """
-            model.eval()
-            timestep = hmax / n_samples
-
-            # 1) Compute intensity
-            time_between_events = torch.linspace(0, hmax, n_samples + 1).to(device)
-            hidden_vals = h_t * torch.exp(-decay * time_between_events[:, None])
-            intensity = model.intensity_layer(hidden_vals.to(device))
-            intensity_sum = intensity.sum(dim=1)
+                # gt last and one before last event types and times
+                gt_type = seq_events[i + 1]
+                gt_dt = seq_time[i+1]
 
 
-            # 2) Compute density via integral 
-            density = torch.cumsum(timestep * intensity.sum(dim=1), dim=0)
-            density = intensity_sum * torch.exp(-density)
+                """ Make prediction for the next event time and type """
+                model.eval()
+                timestep = hmax / n_samples
 
-            # 3) Predict time of the next event via trapeze method
-            t = time_between_events * density   
-            pred_dt = (timestep * 0.5 * (t[1:] + t[:-1])).sum() 
-            # 4) Predict type of the event via trapeze method
-            P = intensity / intensity_sum[:, None] * density[:, None]  
-            pred_type = torch.argmax(timestep * 0.5 * (P[1:] + P[:-1])).sum(dim=0)
+                # 1) Compute intensity
+                time_between_events = torch.linspace(0, hmax, n_samples + 1).to(device)
+                hidden_vals = h_t * torch.exp(-decay * time_between_events[:, None])
+                intensity = model.intensity_layer(hidden_vals.to(device))
+                intensity_sum = intensity.sum(dim=1)
 
-            return pred_dt.cpu().numpy(), gt_dt.cpu().numpy(), pred_type.cpu().numpy(), gt_type.cpu().numpy(), \
-                            time_between_events.cpu().numpy(), intensity.cpu().numpy()
+
+                # 2) Compute density via integral 
+                density = torch.cumsum(timestep * intensity.sum(dim=1), dim=0)
+                density = intensity_sum * torch.exp(-density)
+
+                # 3) Predict time of the next event via trapeze method
+                t = time_between_events * density   
+                pred_dt = (timestep * 0.5 * (t[1:] + t[:-1])).sum() 
+                # 4) Predict type of the event via trapeze method
+                P = intensity / intensity_sum[:, None] * density[:, None]  
+
+                #pred_type = torch.argmax(timestep * 0.5 * (P[1:] + P[:-1])).sum(dim=0)
+                pred_type = (timestep * 0.5 * (P[1:] + P[:-1])).sum(dim=0)
+                pred_type = pred_type.argmax()
+
+                if i > 1:
+                    times_gt.append(gt_dt.item())
+                    times_pred.append(pred_dt.item())
+                    types_gt.append(gt_type.item())
+                    types_pred.append(pred_type.item())
+
+
+            return times_gt, times_pred, types_gt, types_pred
+
         
         
 def plot_stats(stats):
