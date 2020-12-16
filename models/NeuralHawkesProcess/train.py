@@ -98,7 +98,7 @@ def train(model, optimizer, train_loader, val_loader, device, scheduler=None, n_
             if type(scheduler).__name__ != 'ReduceLROnPlateau':
                 scheduler.step()
             else:
-                criterion_value = -statistics['val'][-1][0]+scale*statistics['val'][-1][1]+statistics['val'][-1][2] if scale is not None else -statistics['val'][-1][0]
+                criterion_value = -statistics['val'][-1][0]+scale*statistics['val'][-1][1]+statistics['val'][-1][2] if scale is not None else -statistics['val'][-1]
                 scheduler.step(criterion_value)
 
         if save_path:
