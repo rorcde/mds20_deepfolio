@@ -44,9 +44,57 @@ This repository contains the codebase for the project, its structure is the foll
 
 
 ## Results
-Models were trained on the combined dataset, which wascomposed of sequences of all cryptocurrencies (ETH, EOS, LTC, BNB, XRP) with lengths 3000.
-In the table below comparison of scores of all models provided.
+Models were trained on the combined dataset, which wascomposed of sequences of all cryptocurrencies (ETH, EOS, LTC, BNB, XRP) with lengths 3000,
+and then tested separatly on each cryptocurrency.
 
+Results for NHP model (Log-Likelihood loss and event prediction from probability density)
+
+
+
+|     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| ETH           | -7.904           | 23.808    | 0.447         | 
+| EOS           | -9.075           | 53.112    | 0.450         | 
+| LTC           | -9.126           | 43.965    | 0.465        |
+| BNB           | -11.307 | 77.652 | 0.467        |
+| XRP           | -10.398 | 73.989 | 0.457        |
+
+Results for NHP+ model (Two linear layers for event prediction and Log-Likelihood loss + time loss + event loss)
+
+
+|     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| ETH           | 7.922  | 22.570  | 0.704         | 
+| EOS           | -9.060 | 52.455  | 0.707         | 
+| LTC           | -9.110 | 43.744  | 0.705        |
+| BNB           | -11.232 | 78.106 | 0.703        |
+| XRP           | -10.347 | 71.850 | 0.706        |
+
+
+Results for UNIPoint model 
+
+|     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| ETH           | -7.665 | 20.381 | 0.512         | 
+| EOS           | -7.444 | 52.999 | 0.511         | 
+| LTC           | -7.057 | 28.826 | 0.507        |
+| BNB           | -6.546 | 61.611 | 0.512       |
+| XRP           | -7.065 | 43.986 | 0.514        |
+
+
+Results for THP model 
+
+
+|     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| ETH           | -3.751 | 12.544 | 0.703         | 
+| EOS           | -4.073 | 35.117 | 0.707         | 
+| LTC           | -4.266 | 25.843 | 0.706        |
+| BNB           | -4.941 | 50.056 | 0.706       |
+| XRP           | -4.600 | 48.595 | 0.706        |
+
+
+Mean scores of all models on all crypto datasets.
 
 |     Model     | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
