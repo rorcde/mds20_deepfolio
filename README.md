@@ -30,7 +30,7 @@ Clone GitHub repository:
 git clone https://github.com/rodrigorivera/mds20_deepfolio
 ```
 
-Make sure that all dependencies are installed.
+Make sure that all dependencies are installed and run the respective notebooks, containing the experiments for each model.
 
 ## Content
 
