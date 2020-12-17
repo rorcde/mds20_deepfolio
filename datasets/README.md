@@ -4,6 +4,10 @@
 
 This folder contains the code used to download and preprocess the dataset used in this work. Since the datasets themselves are too heavy to be uploaded directly to git, they are available in <a href="https://drive.google.com/drive/folders/1kY7rH7gAC_PEW877IDI8g4jdyodooF9k?usp=sharing" target='_blank'> Google disk </a> . For the moment, 4 datasets are presented there: for Etherium (ETH), Ripple (XRP), Litecoin (LTC) and IOTA. The test dataset is available by the link <a href="https://drive.google.com/drive/folders/1Oys0ObRH3ab9WAnhTmCsHG1i4OlZinn-" target='_blank'> Google disk for test dataset </a>
 
+File Binance_API_dataset contains the code for downloading the data from Binance API to the Google Drive.
+
+File Sequential_data_preprocessing contains all the manipulations with data to achieve the form of temporal point process.
+
 ## Temporal point process
 
 This type of process, which would be represented by the data points, is described in Soen et al: 
