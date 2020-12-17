@@ -6,7 +6,7 @@ This folder contains the code used to download and preprocess the dataset used i
 
 File Binance_API_dataset contains the code for downloading the data from Binance API to the Google Drive.
 
-File Sequential_data_preprocessing contains all the manipulations with data to achieve the form of temporal point process.
+File Sequential_data_processing contains all the manipulations with data to achieve the form of temporal point process.
 
 ## Temporal point process
 
