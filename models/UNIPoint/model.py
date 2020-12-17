@@ -59,7 +59,8 @@ class UNIPoint(nn.Module):
       self.hidden_size = hidden_size
       self.device = device
 
-      self.time_predictor  = nn.Linear(hidden_size, 1, bias=False) #here 12 is a batch_size - fix later
+      self.time_predictor  = nn.Linear(hidden_size, 1, bias=False) 
+      self.event_predictor = nn.Linear(hidden_size, n_events, bias=False)
 
     def ReLU(self, parameter_1, parameter_2, time):
       """Function to apply Rectified Linear Unit (ReLU) as basis function inside network 
