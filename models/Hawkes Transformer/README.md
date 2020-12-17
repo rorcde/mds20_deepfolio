@@ -90,9 +90,11 @@ from NHP): <a href="https://github.com/rodrigorivera/mds20_deepfolio/blob/main/i
 * **train.py** - contains train functions,
 * **dataset_wrapper.py** - contains code for the dataset wrapper which feeds data in a required manner to the network,
 * **utils.py** - utility functions,
-* **THP_experiment_1.ipynb** - contains experiment on the financial data from NHP paper
-* **THP_experiment_eth.ipynb** - contains experiment on the LOB data for Ethereum (ETH) cryptocoin
-* **THP_experiment_all.ipynb** - contains code to train the model on all LOB datasets
+* **THP_experiment_1.ipynb** - contains experiment on the financial data from NHP paper,
+* **THP_experiment_eth.ipynb** - contains experiment on the LOB data for Ethereum (ETH) cryptocoin,
+* **THP_experiment_all.ipynb** - contains code to train the model on all LOB datasets,
+* **THP_param_tuning.ipynb** - contains hyperparameter tuning for THP,
+* **THP_transfer.ipynb** - contains out-of-sample testing of THP on XLM crypto currency
 
 ## Model weights
 
