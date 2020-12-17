@@ -126,5 +126,7 @@ which seems to the better choice (according to target metrics).
 * **DataWrapper.py.py** - contains code for the dataset wrapper which feeds data in a required manner to the network,
 * **utils.py** - utility functions,
 * **LOB_exp.ipynb** - contains training and evaluating code on LOB data
+* **NHM_exp.ipynb** - contains training and evaluating code on financial data from original paper
+* **NHP_transfer.ipynb** - contains out-of-sample testing on XLM crypto currency
 * folder **weights** - contains model weights
 
