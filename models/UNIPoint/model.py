@@ -41,7 +41,7 @@ def create_unifrom_d(event_times, device = None):
     return sim_inter_times.to(device) if device != None else sim_inter_times
 
 class UNIPoint(nn.Module):
-    def __init__(self, n_features, n_parameters, n_basis_functions, device, n_events=2, hidden_size=256):
+    def __init__(self, n_features, n_parameters, n_basis_functions, device, hidden_size=256):
       """
       Input parameters:
       n_neurons - number of neurons inside RNN
@@ -60,7 +60,6 @@ class UNIPoint(nn.Module):
       self.device = device
 
       self.time_predictor  = nn.Linear(hidden_size, 1, bias=False) #here 12 is a batch_size - fix later
-      self.event_predictor = nn.Linear(hidden_size, n_events, bias=False)
 
     def ReLU(self, parameter_1, parameter_2, time):
       """Function to apply Rectified Linear Unit (ReLU) as basis function inside network 
@@ -99,11 +98,11 @@ class UNIPoint(nn.Module):
           for function in range(self.n_basis_functions): 
               # calculating numbers of parameters to take for basis function
               par1 = 2 * function
-              par2 = 2 * function + 1  
-              self.basis_res[:, function] = self.PowerLaw(par1, par2, tau) 
-                            
+              par2 = 2 * function + 1
+              self.basis_res[:, function] = self.ReLU(par1, par2, tau) 
+          
           self.sum_res = torch.sum(self.basis_res, 1)
-          intensity = self.Softplus(self.sum_res) * 0.0000001
+          intensity = self.Softplus(self.sum_res)
 
           return intensity
 
@@ -140,10 +139,9 @@ class UNIPoint(nn.Module):
       #print("'intensity_values' length ", len(intensity_values))
       #print("'torch.stack(intensity_values)' shape is ", torch.stack(intensity_values).shape)
       #stack_intensity.append(torch.stack(intensity_values))
-      time_pred  = self.time_predictor(torch.stack(hidden_states))
-      event_pred  = self.event_predictor(torch.stack(hidden_states))
-
-      return  torch.stack(intensity_values), torch.transpose(time_pred, 0,1), torch.transpose(event_pred, 0,1)
+      time_pred  = self.time_predict(batch_size, hidden_states)
+                    
+      return  torch.stack(intensity_values), time_pred
 
     def LogLikelihoodLoss(self, intensity, event_times):
         """
@@ -165,12 +163,12 @@ class UNIPoint(nn.Module):
 
         sim_intesity = torch.stack(sim_intesity).to(self.device)
         tot_time_seqs, seq_len = event_times.sum(dim=1), event_times.shape[1]
-        mc_coef = (tot_time_seqs / seq_len).to(self.device)
+        mc_coef = (tot_time_seqs / seq_len)
 
         simulated_likelihood = sim_intesity.sum(dim=0) * mc_coef
         
         # sum over batch
-        LLH = (original_loglikelihood.to(self.device) - simulated_likelihood.to(self.device)).sum()
+        LLH = (original_loglikelihood - simulated_likelihood).sum()
 
         return -LLH
 
@@ -182,7 +180,7 @@ class UNIPoint(nn.Module):
         return time_prediction
 
 
-    def time_loss(self, time_pred, time):
+    def time_error(self, time_pred, time):
         """
         Function to compute mean squared error for time predictions.
         Input:
@@ -192,25 +190,24 @@ class UNIPoint(nn.Module):
             time_error (float) - time prediction error for the whole batch
         """
 
-        time_pred = time_pred.squeeze()
         time_ground_truth = time[:, 1:] # - time[:, :-1]
-        time_pred = time_pred[:, :-1]
+        time_pred = time_pred[:-1, :]
 
         time_error = nn.MSELoss(reduction='mean')(time_pred, time_ground_truth)
         return time_error
-
+    
     def event_loss(self, events_pred, events_gt):
 
-          """
-          Compute cross entropy loss for the event type prediction
-          Input:
+        """
+        Compute cross entropy loss for the event type prediction
+        Input:
               events_pred (batch_size, seq_len, n_events) - event type probabilities prediction
               events_gt (batch_size, seq_len) - ground truth for event types
-          Output:
+        Output:
               event_error (float) - cross entropy loss for the batch
-          """
-          events_gt = events_gt[:, 1:]
-          events_pred = events_pred[:, :-1]
-          loss = nn.CrossEntropyLoss()(torch.transpose(events_pred, 1,2), events_gt.long())
+        """
+        events_gt = events_gt[:, 1:]
+        events_pred = events_pred[:, :-1]
+        loss = nn.CrossEntropyLoss()(torch.transpose(events_pred, 1,2), events_gt.long())
 
-          return loss
+        return loss
