@@ -192,8 +192,8 @@ class UNIPoint(nn.Module):
             time_error (float) - time prediction error for the whole batch
         """
 
-        #time_pred = time_pred.squeeze()
-        time_ground_truth = time[1:, :] # - time[:, :-1]
+        time_pred = time_pred.squeeze()
+        time_ground_truth = time[:, 1:] # - time[:, :-1]
         time_pred = time_pred[:-1, :]
 
         time_error = nn.MSELoss(reduction='mean')(time_pred, time_ground_truth)
@@ -214,4 +214,3 @@ class UNIPoint(nn.Module):
           loss = nn.CrossEntropyLoss()(torch.transpose(events_pred, 1,2), events_gt.long())
 
           return loss
-
