@@ -10,6 +10,12 @@
 </p>
 
 ## Architecture
+
+<p align="center">
+<img src="https://github.com/rodrigorivera/mds20_deepfolio/blob/main/images/NHP_model.png" />
+</p>
+
+
 At the input of the model we have  <a href=""><img src="https://latex.codecogs.com/svg.latex?(k_i,%20t_i)" /></a>, 
 where  <a href=""><img src="https://latex.codecogs.com/svg.latex?k_i" /></a> - type of event 
 and <a href=""><img src="https://latex.codecogs.com/svg.latex?t_i" /></a> - time of event occurrence, 
@@ -119,6 +125,6 @@ which seems to the better choice (according to target metrics).
 * **train.py** - contains train functions,
 * **DataWrapper.py.py** - contains code for the dataset wrapper which feeds data in a required manner to the network,
 * **utils.py** - utility functions,
-* **NHP_exp2.ipynb** - contains experiment on the financial data from NHP paper
+* **LOB_exp.ipynb** - contains training and evaluating code on LOB data
 * folder **weights** - contains model weights
 
