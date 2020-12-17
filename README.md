@@ -41,3 +41,16 @@ This repository contains the codebase for the project, its structure is the foll
 * **images** folder contains images used in readmes;
 * **experiment.ipynb** (to be created) is a Jupyter Notebook file, containing the reproduction of experiments conducted during this project;
 * to be continued...
+
+
+## Results
+Models were trained on the combined dataset, which wascomposed of sequences of all cryptocurrencies (ETH, EOS, LTC, BNB, XRP) with lengths 3000.
+In the table below comparison of scores of all models provided.
+
+
+|     Model     | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| NHP           | -9.562           | 54.505    | 0.457         | 
+| NHP+          | -9.534           | 53.745    | 0.705         | 
+| UNIPoint      | -7.115           | 41.560    |  0.511        |
+| THP           | -4.326           | 34.431    | 0.706         |
