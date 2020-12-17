@@ -64,7 +64,7 @@ Results for NHP+ model (Two linear layers for event prediction and Log-Likelihoo
 
 |     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
-| ETH           | 7.922  | 22.570  | 0.704         | 
+| ETH           | -7.922  | 22.570  | 0.704         | 
 | EOS           | -9.060 | 52.455  | 0.707         | 
 | LTC           | -9.110 | 43.744  | 0.705        |
 | BNB           | -11.232 | 78.106 | 0.703        |
