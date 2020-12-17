@@ -140,8 +140,9 @@ class UNIPoint(nn.Module):
       #print("'torch.stack(intensity_values)' shape is ", torch.stack(intensity_values).shape)
       #stack_intensity.append(torch.stack(intensity_values))
       time_pred  = self.time_predict(batch_size, hidden_states)
-                    
-      return  torch.stack(intensity_values), time_pred
+      event_pred  = self.event_predictor(torch.stack(hidden_states))
+
+      return  torch.stack(intensity_values), time_pred, torch.transpose(event_pred, 0,1)
 
     def LogLikelihoodLoss(self, intensity, event_times):
         """
