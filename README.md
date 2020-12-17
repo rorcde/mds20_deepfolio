@@ -102,3 +102,15 @@ Mean scores of all models on all crypto datasets.
 | NHP+          | -9.534 ± 1.279    | 53.745 ± 22.331  | 0.705 ± 0.001       | 
 | UNIPoint      | -7.115 ± 0.427        | 41.560 ± 16.952  |  0.511 ± 0.002        |
 | THP           | -4.326 ± 0.461       | 34.431 ± 15.795   | 0.706 ± 0.001        |
+
+Inference on the Stellar coin (XLM), which was notpresented in the training sample.
+
+NHP    & -15.425 &  148.175 & 0.704 \\
+UNIPoint    & -14.051 & 133.091 & 0.508 \\
+THP    & -5.966 & 115.423 & 0.703 \\
+
+|     Model     | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| NHP+          |  -15.425 |  148.175 | 0.704        | 
+| UNIPoint      | -14.051 | 133.091 | 0.508     | 
+| THP           | -5.966 | 115.423 | 0.703        |
