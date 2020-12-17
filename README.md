@@ -37,11 +37,9 @@ Make sure that all dependencies are installed and run the respective notebooks, 
 
 This repository contains the codebase for the project, its structure is the following:
 * **datasets** folder contains the code that was used to download and transform raw data into LOB, as well as all the required preprocessing of the data;
-* **models** folder contains codebase for the models used in this project;
+* **models** folder contains codebase for the models used in this project, as well as detailed description of the models and implementation details;
 * **implementations** folder contains existing implementations of the used models that we used as a reference / inspiration for our own versions, as well as detailed implementation descriptions and differences with our own versions;
-* **images** folder contains images used in readmes;
-* **experiment.ipynb** (to be created) is a Jupyter Notebook file, containing the reproduction of experiments conducted during this project;
-* to be continued...
+* **images** folder contains images used in the readmes.
 
 
 ## Results
