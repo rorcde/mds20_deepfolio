@@ -194,7 +194,7 @@ class UNIPoint(nn.Module):
 
         time_pred = time_pred.squeeze()
         time_ground_truth = time[:, 1:] # - time[:, :-1]
-        time_pred = time_pred[:, :-1]
+        time_pred = time_pred[:-1, :]
 
         time_error = nn.MSELoss(reduction='mean')(time_pred, time_ground_truth)
         return time_error
