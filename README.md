@@ -6,7 +6,8 @@
   <a href="#description">Description</a> •
   <a href="#dependencies">Dependencies</a> •
   <a href="#setup">Setup</a> •
-  <a href="#content">Content</a>
+  <a href="#content">Content</a> •
+  <a href="#results">Results</a>
 </p>
 
 ## Description
@@ -44,12 +45,10 @@ This repository contains the codebase for the project, its structure is the foll
 
 
 ## Results
-Models were trained on the combined dataset, which wascomposed of sequences of all cryptocurrencies (ETH, EOS, LTC, BNB, XRP) with lengths 3000,
+Models were trained on the combined dataset, which was composed of sequences of all cryptocurrencies (ETH, EOS, LTC, BNB, XRP) with lengths 3000,
 and then tested separatly on each cryptocurrency.
 
-Results for NHP model (Log-Likelihood loss and event prediction from probability density)
-
-
+Results for NHP model (Log-Likelihood loss and time / event prediction from probability density):
 
 |     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
@@ -59,8 +58,7 @@ Results for NHP model (Log-Likelihood loss and event prediction from probability
 | BNB           | -11.307 | 77.652 | 0.467        |
 | XRP           | -10.398 | 73.989 | 0.457        |
 
-Results for NHP+ model (Two linear layers for event prediction and Log-Likelihood loss + time loss + event loss)
-
+Results for NHP+ model (Two linear layers for event prediction and Log-Likelihood loss + time loss + event loss):
 
 |     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
@@ -70,8 +68,7 @@ Results for NHP+ model (Two linear layers for event prediction and Log-Likelihoo
 | BNB           | -11.232 | 78.106 | 0.703        |
 | XRP           | -10.347 | 71.850 | 0.706        |
 
-
-Results for UNIPoint model 
+Results for UNIPoint model:
 
 |     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
@@ -81,9 +78,7 @@ Results for UNIPoint model
 | BNB           | -6.546 | 61.611 | 0.512       |
 | XRP           | -7.065 | 43.986 | 0.514        |
 
-
-Results for THP model 
-
+Results for THP model:
 
 |     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
@@ -93,8 +88,7 @@ Results for THP model
 | BNB           | -4.941 | 50.056 | 0.706       |
 | XRP           | -4.600 | 48.595 | 0.706        |
 
-
-Mean scores of all models on all crypto datasets.
+Mean scores of all models on all crypto datasets:
 
 |     Model     | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
@@ -103,11 +97,7 @@ Mean scores of all models on all crypto datasets.
 | UNIPoint      | -7.115 ± 0.427        | 41.560 ± 16.952  |  0.511 ± 0.002        |
 | THP           | -4.326 ± 0.461       | 34.431 ± 15.795   | 0.706 ± 0.001        |
 
-Inference on the Stellar coin (XLM), which was notpresented in the training sample.
-
-NHP    & -15.425 &  148.175 & 0.704 \\
-UNIPoint    & -14.051 & 133.091 & 0.508 \\
-THP    & -5.966 & 115.423 & 0.703 \\
+Results of out-of-sample testing, performed on Stellar (XLM) coin, which was not at all present among the training samples
 
 |     Model     | Log-Likelihood   | Time RMSE | Event Accuracy|
 |---------------|------------------|-----------|---------------|
