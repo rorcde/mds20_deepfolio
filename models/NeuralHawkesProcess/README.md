@@ -130,3 +130,25 @@ which seems to the better choice (according to target metrics).
 * **NHP_transfer.ipynb** - contains out-of-sample testing on XLM crypto currency
 * folder **weights** - contains model weights
 
+## Results
+
+Results for NHP model (Log-Likelihood loss and event prediction from probability density)
+
+|     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| ETH           | -7.904           | 23.808    | 0.447         | 
+| EOS           | -9.075           | 53.112    | 0.450         | 
+| LTC           | -9.126           | 43.965    | 0.465        |
+| BNB           | -11.307 | 77.652 | 0.467        |
+| XRP           | -10.398 | 73.989 | 0.457        |
+
+Results for NHP+ model (Two linear layers for event prediction and Log-Likelihood loss + time loss + event loss)
+
+
+|     Dataset   | Log-Likelihood   | Time RMSE | Event Accuracy|
+|---------------|------------------|-----------|---------------|
+| ETH           | -7.922  | 22.570  | 0.704         | 
+| EOS           | -9.060 | 52.455  | 0.707         | 
+| LTC           | -9.110 | 43.744  | 0.705        |
+| BNB           | -11.232 | 78.106 | 0.703        |
+| XRP           | -10.347 | 71.850 | 0.706        |
