@@ -41,7 +41,7 @@ def create_unifrom_d(event_times, device = None):
     return sim_inter_times.to(device) if device != None else sim_inter_times
 
 class UNIPoint(nn.Module):
-    def __init__(self, n_features, n_parameters, n_basis_functions, device, hidden_size=256):
+    def __init__(self, n_features, n_parameters, n_basis_functions, device, n_events=2, hidden_size=256):
       """
       Input parameters:
       n_neurons - number of neurons inside RNN
