@@ -11,7 +11,9 @@
 
 ## Description
 
-Usually, when one deals with <a href="https://www.investopedia.com/terms/l/limitorderbook.asp" target="_blank"> Limit Order Book (LOB) </a> data, the common way is to treat it as time series or tabular data. This project investigates another possible approach, which is treatment of LOB data as long event sequences with two possible events (buy or sell), which allows one to use a rich mathematical apparatus developed for temporal point processes.
+Usually, when one deals with <a href="https://www.investopedia.com/terms/l/limitorderbook.asp" target="_blank"> Limit Order Book (LOB) </a> data, the common way is to treat it as time series or tabular data. This project investigates another possible approach, which is treatment of LOB data as long event sequences with two possible events (price going up or down), which allows one to use a rich mathematical apparatus developed for temporal point processes on LOB data.
+
+We are going to consider three main models - <a href="https://arxiv.org/abs/1612.09328">Neural Hawkes Process</a> (baseline), <a href="https://arxiv.org/abs/2007.14082">UNIPoint</a>, and <a href="https://arxiv.org/abs/2002.09291">Transformer Hawkes Process</a>. The aforementioned models will be implemented from scratch, adapted towards usage on LOB data, tuned and tested on our self-collected limit order book dataset consisting of five tokens - Ethereum (ETH), Litecoin (LTC), EOSIO (EOS), Ripple (XRP), Binance coin (BNB). We intentionally skip the most popular crypto asset - Bitcoin (BTC), because we are interested in robustness of the models when dealing with data coming from less liquid markets. In addition to that, we also perform an out-of-sample test on Stellar coin (XLM) to see the generalization capability of the models and how they would react to an unknown coin being introduced, i.e. whether there are general features in the LOB event sequences that could exploited, opening access for e.g. transfer learning in the future.
 
 ## Dependencies
 
